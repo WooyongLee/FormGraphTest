@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Common.cs" />
+    <Compile Include="Components\ConstellationComponent.cs" />
     <Compile Include="FormConstellationChart.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -54,9 +56,8 @@
     <Compile Include="FormGraphMain.Designer.cs">
       <DependentUpon>FormGraphMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="GraphParameterDummy.cs" />
+    <Compile Include="Components\GraphComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tracer.cs" />
     <Compile Include="Util.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
@@ -68,5 +69,6 @@
       <DependentUpon>FormGraphMain.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

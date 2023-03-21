@@ -6,16 +6,19 @@
         xmlns:form="clr-namespace:FormGraphLib;assembly=FormGraphLib"
         xmlns:local="clr-namespace:FormGraph"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1000" Width="1200">
+        Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <WindowsFormsHost>
-                <form:FormGraphMain x:Name="MainForm"></form:FormGraphMain>
-            </WindowsFormsHost>
+            <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100"></ToggleButton>
+            <Grid>
+                <WindowsFormsHost x:Name="FormGraphChart" >
+                    <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
+                </WindowsFormsHost>
 
-            <WindowsFormsHost>
-                <form:FormConstellationChart x:Name="ConstellationChart"></form:FormConstellationChart>
-            </WindowsFormsHost>
+                <WindowsFormsHost x:Name="FormConstellationChart" Visibility="Hidden">
+                    <form:FormConstellationChart x:Name="ConstellationChart"></form:FormConstellationChart>
+                </WindowsFormsHost>
+            </Grid>
         </StackPanel>
     </Grid>
 </Window>

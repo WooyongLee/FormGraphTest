@@ -13,36 +13,31 @@ namespace FormGraphLib
     public partial class FormGraphMain: UserControl
     {
         public const string FontNameD = "Microsoft Sans Serif";
-
-        // Max ChartView Size
-        static int MaxWidth = 1200;
-        static int MaxHeight = 640;
-
-        // Main View Size
-        int pbMainWidth = 1001;
-        int pbMainHeight = 390;
-
-        // 축에서 정의하는 선의 갯수
-        int xAxisLineCount = 10;
-        int yAxisLineCount = 10;
-
-        const int BasePaddingY = 40; // 좌표 표시 공간
-        int pbMainPaddingX = 70; // 문자열을 보여주는 부분 크기
-        int pbMainPaddingY = BasePaddingY;
-
-        const int DataLength = 1001; // 1001 / 2 + 1 
-
+        private bool isLoaded = false;
         public FormGraphMain()
         {
             InitializeComponent();
 
-            this.Initform();
+            this.pictureBox1.Paint += PictureBox1_Paint;
+        }
 
-            pictureBox1.Paint += PictureBox1_Paint;
+        public override void Refresh()
+        {
+            base.Refresh();
+
+            this.pictureBox1.Refresh();
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
+            // Load가 먹지 않아서 Paint Event 호출 시 초기화
+            if (!isLoaded)
+            {
+                isLoaded = true;
+
+                this.Initform();
+            }
+
             this.Draw(e.Graphics);
 
             pictureBox1.Invalidate();
@@ -50,49 +45,55 @@ namespace FormGraphLib
 
         public void Initform()
         {
+            // Initalize Component
+            GraphComponent.Init();
+
+            // Set Size
+            this.pictureBox1.Size = new System.Drawing.Size(GraphComponent.MaxWidth, GraphComponent.MaxHeight);
+
             // Set Background Color
-            this.pictureBox1.BackColor = GraphParameterDummy.Instance.BackgroundColor;
+            this.pictureBox1.BackColor = Common.BackgroundColor;
         }
 
         public void Draw(Graphics g)
         {
-            var startY = GraphParameterDummy.Instance.Amp_Ref_Level;
-            var stepY = GraphParameterDummy.Instance.Amp_Scale_Div;
+            var startY = GraphComponent.AmpRefLevel;
+            var stepY = GraphComponent.AmpScaleDiv;
 
             DrawAxis(g, startY, stepY);
 
             // Draw Data Trace
             // Trace 1개만 활성화 되어있다고 가정
             DrawTrace(g, 0);
-            // for ( int i = 0; i < Tracer.MaxTotalTraceCount; i++) { }
-
-
         }
 
+        // Trace가 여러개 있을 때에 대한 Draw함수, 일단 단일 Trace에 대해서만 도시
         private void DrawTrace(Graphics g, int i)
         {
-            Tracer TracerZ = new Tracer();
-            int tracerWorkDetectorLL = 0;
-            int td = tracerWorkDetectorLL; // ?? WorkDetectorLL 변수의 의미
-            DrawLinesFromData(g, Tracer.LineColor[i], TracerZ.data, td);
+            double[] data = new double[2002];
+            if (GraphComponent.IsShowSample) MakeSampleData(ref data);
+            DrawLinesFromData(g, GraphComponent.LineColor, data);
         }
 
-        private void DrawLinesFromData(Graphics g, Pen lineColor, double[] data, int td)
+        private void DrawLinesFromData(Graphics g, Pen lineColor, double[] data)
         {
-            var LimitY_Main = pbMainPaddingY + pbMainHeight;
+            int td = 0;
+            int DataLength = data.Length / 2; //  1001; // 1001 / 2 + 1 
 
-            var step = 1.0f;
-            var stepi = (int)step;
+            var LimitY_Main = GraphComponent.MainPaddingY + GraphComponent.MainHeight;
+
+            // var step = 1.0f;
+            var step = (float)GraphComponent.MainWidth / (float)DataLength;
 
             double tempY = 0.0;
 
-            int pbMainHeightHalf = pbMainHeight / 2;
+            int pbMainHeightHalf = GraphComponent.MainHeight / 2;
 
-            PointF beginPoint4 = new PointF(pbMainPaddingX, pbMainPaddingY + pbMainHeightHalf);
-            PointF endPoint4 = new PointF(pbMainPaddingX + 1, pbMainPaddingY + pbMainHeightHalf);
+            PointF beginPoint4 = new PointF(GraphComponent.MainPaddingX, GraphComponent.MainPaddingY + pbMainHeightHalf);
+            PointF endPoint4 = new PointF(GraphComponent.MainPaddingX + 1, GraphComponent.MainPaddingY + pbMainHeightHalf);
 
             // Amplitude Scale Division을 10으로 나눈 Scale을 설정함
-            double Scale = GraphParameterDummy.Instance.Amp_Scale_Div * (10.0 / 100.0);
+            double Scale = GraphComponent.AmpScaleDiv * GraphComponent.AmpScaleDivRatio;
             Scale = 1 / Scale;
 
             if (td == 0)
@@ -101,30 +102,30 @@ namespace FormGraphLib
                 for ( int i = 0; i < DataLength; i++)
                 {
                     // 음수로 전환함, 음의 값으로 커질 경우 그래프의 y 값이 증가하므로
-                    double yy_min = -(data[i * 2] + GraphParameterDummy.Instance.Amp_Offset);
-                    double yy_max = -(data[i * 2 + 1] + GraphParameterDummy.Instance.Amp_Offset); 
+                    double yy_min = -(data[i * 2] + GraphComponent.AmpOffset);
+                    double yy_max = -(data[i * 2 + 1] + GraphComponent.AmpOffset); 
 
                     double yy2 = 0;
-                    yy2 += GraphParameterDummy.Instance.Amp_Ref_Level;
+                    yy2 += GraphComponent.AmpRefLevel;
                     
                     // y 최소값에 대한 Scaling
                     yy_min += yy2;
-                    yy_min *= Scale * ((float)pbMainHeight / 100);
+                    yy_min *= Scale * ((float)GraphComponent.MainHeight / 100);
 
                     // y 최대값에 대한 Scaling
                     yy_max += yy2;
-                    yy_max *= Scale * ((float)pbMainHeight / 100);
+                    yy_max *= Scale * ((float)GraphComponent.MainHeight / 100);
 
                     float xx = i * step;
 
-                    beginPoint4 = new PointF(pbMainPaddingX + xx, pbMainPaddingY + (float)yy_min);
+                    beginPoint4 = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + (float)yy_min);
                     tempY = beginPoint4.Y;
                     if (CheckY(ref tempY, LimitY_Main) != 0)
                     {
                         continue;
                     }
                     beginPoint4.Y = (float)tempY;
-                    endPoint4 = new PointF(pbMainPaddingX + xx, pbMainPaddingY + (float)yy_max);
+                    endPoint4 = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + (float)yy_max);
                     tempY = endPoint4.Y;
                     if (CheckY(ref tempY, LimitY_Main) != 0)
                     {
@@ -137,163 +138,167 @@ namespace FormGraphLib
                 // Change LineColor
                 lineColor = Pens.Blue;
 
-                for ( int i = 0; i < DataLength - 1; i++)
-                {
-                    double yy = -(data[i] + GraphParameterDummy.Instance.Amp_Offset);
-                    double yy2 = 0;
-                    yy2 += GraphParameterDummy.Instance.Amp_Ref_Level;
-                    yy += yy2;
-                    yy *= Scale * ((float)pbMainHeight / 100);
+                //for ( int i = 0; i < DataLength - 1; i++)
+                //{
+                //    double yy = -(data[i] + GraphComponent.AmpOffset);
+                //    double yy2 = 0;
+                //    yy2 += GraphComponent.AmpRefLevel;
+                //    yy += yy2;
+                //    yy *= Scale * ((float)GraphComponent.MainHeight / 100);
 
-                    if (i == 0)
-                    {
-                        beginPoint4 = new PointF(pbMainPaddingX, pbMainPaddingY + (float)yy);
-                        tempY = beginPoint4.Y;
-                        if (CheckY(ref tempY, LimitY_Main) != 0)
-                        {
-                            continue;
-                        }
-                        beginPoint4.Y = (float)tempY;
-                        continue;
-                    }
+                //    if (i == 0)
+                //    {
+                //        beginPoint4 = new PointF(GraphComponent.MainPaddingX, GraphComponent.MainPaddingY + (float)yy);
+                //        tempY = beginPoint4.Y;
+                //        if (CheckY(ref tempY, LimitY_Main) != 0)
+                //        {
+                //            continue;
+                //        }
+                //        beginPoint4.Y = (float)tempY;
+                //        continue;
+                //    }
 
-                    float xx = i * step;
-                    endPoint4 = new PointF(pbMainPaddingX + xx, pbMainPaddingY + (float)yy);
-                    tempY = endPoint4.Y;
-                    if (CheckY(ref tempY, LimitY_Main) != 0)
-                    {
-                        continue;
-                    }
-                    endPoint4.Y = (float)tempY;
-                    // 두 번째 Line의 잠시 주석
-                    // g.DrawLine(lineColor, beginPoint4, endPoint4);
+                //    float xx = i * step;
+                //    endPoint4 = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + (float)yy);
+                //    tempY = endPoint4.Y;
+                //    if (CheckY(ref tempY, LimitY_Main) != 0)
+                //    {
+                //        continue;
+                //    }
+                //    endPoint4.Y = (float)tempY;
+                //    // 두 번째 Line의 잠시 주석
+                //    // g.DrawLine(lineColor, beginPoint4, endPoint4);
 
-                    beginPoint4.X = endPoint4.X;
-                    beginPoint4.Y = endPoint4.Y;
-                } // end for ( int i = 0; i < DataLength - 1
+                //    beginPoint4.X = endPoint4.X;
+                //    beginPoint4.Y = endPoint4.Y;
+                //} // end for ( int i = 0; i < DataLength - 1
 
             } // end if (td == 0)
 
-            else
-            {
-                for ( int i = 0; i < DataLength; i++)
-                {
-                    double yy = -(data[i] + GraphParameterDummy.Instance.Amp_Offset);
-                    double yy2 = 0;
-                    yy2 += GraphParameterDummy.Instance.Amp_Ref_Level;
+            #region Legacy (주석)
+            //else
+            //{
+            //    for ( int i = 0; i < DataLength; i++)
+            //    {
+            //        double yy = -(data[i] + GraphComponent.AmpOffset);
+            //        double yy2 = 0;
+            //        yy2 += GraphComponent.AmpRefLevel;
 
-                    yy += yy2;
-                    yy *= Scale * ((float)pbMainHeight / 100);
+            //        yy += yy2;
+            //        yy *= Scale * ((float)GraphComponent.MainHeight / 100);
 
-                    if (i == 0)
-                    {
-                        beginPoint4 = new PointF(pbMainPaddingX, pbMainPaddingY + (float)yy);
-                        tempY = beginPoint4.Y;
-                        if (CheckY(ref tempY, LimitY_Main) != 0)
-                        {
-                            continue;
-                        }
-                        beginPoint4.Y = (float)tempY;
-                        continue;
-                    }
+            //        if (i == 0)
+            //        {
+            //            beginPoint4 = new PointF(GraphComponent.MainPaddingX, GraphComponent.MainPaddingY + (float)yy);
+            //            tempY = beginPoint4.Y;
+            //            if (CheckY(ref tempY, LimitY_Main) != 0)
+            //            {
+            //                continue;
+            //            }
+            //            beginPoint4.Y = (float)tempY;
+            //            continue;
+            //        }
 
-                    float xx = i * step;
+            //        float xx = i * step;
 
-                    endPoint4 = new PointF(pbMainPaddingX + xx, pbMainPaddingY + (float)yy);
-                    tempY = endPoint4.Y;
-                    if (CheckY(ref tempY, LimitY_Main) != 0)
-                    {
-                        continue;
-                    }
-                    endPoint4.Y = (float)tempY;
-                    g.DrawLine(lineColor, beginPoint4, endPoint4);
-                } // end for
-            } // end else
+            //        endPoint4 = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + (float)yy);
+            //        tempY = endPoint4.Y;
+            //        if (CheckY(ref tempY, LimitY_Main) != 0)
+            //        {
+            //            continue;
+            //        }
+            //        endPoint4.Y = (float)tempY;
+            //        g.DrawLine(lineColor, beginPoint4, endPoint4);
+            //    } // end for
+            //} // end else
+            #endregion
         }
 
         public void DrawAxis(Graphics g, double startY, double stepY)
         {
-            var gridLineColor = GraphParameterDummy.Instance.GridLineColor;
+            var gridLineColor = GraphComponent.GridLineColor;
 
             // Draw X Axis
-            float xStep = (float)pbMainWidth / xAxisLineCount;
-            float yL = -pbMainHeight;
-            float yLineOfAxis = pbMainHeight;
+            float xStep = (float)GraphComponent.MainWidth / (float)GraphComponent.XAxisLineCount;
+            float yL = -GraphComponent.MainHeight;
+            float yLineOfAxis = GraphComponent.MainHeight;
 
             // 축의 큰 틀을 그림
-            g.DrawLine(gridLineColor, pbMainPaddingX, pbMainPaddingY + yLineOfAxis,
-                pbMainPaddingX + pbMainWidth, pbMainPaddingY + yLineOfAxis);
+            g.DrawLine(gridLineColor, GraphComponent.MainPaddingX, GraphComponent.MainPaddingY + yLineOfAxis,
+                GraphComponent.MainPaddingX + GraphComponent.MainWidth, GraphComponent.MainPaddingY + yLineOfAxis);
             
             // X 축
-            for ( int i = 1; i < xAxisLineCount + 1; i++)
+            for ( int i = 1; i < GraphComponent.XAxisLineCount + 1; i++)
             {
                 // Iterator에 Step 곱연산
                 float xx = i * xStep;
 
                 // x Step 만큼 구분하여 Count 만큼의 선을 그림
-                PointF beginPoint = new PointF(pbMainPaddingX + xx, pbMainPaddingY + yLineOfAxis);
-                PointF endPoint = new PointF(pbMainPaddingX + xx, pbMainPaddingY + yLineOfAxis + yL);
+                PointF beginPoint = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + yLineOfAxis);
+                PointF endPoint = new PointF(GraphComponent.MainPaddingX + xx, GraphComponent.MainPaddingY + yLineOfAxis + yL);
                 g.DrawLine(gridLineColor, beginPoint, endPoint);
             }
 
             // Y 축
-            float yStep = (float)pbMainHeight / yAxisLineCount;
+            float yStep = (float)GraphComponent.MainHeight / GraphComponent.XAxisLineCount;
             float xLineOfXYaxis = 0;
-            float xL = -pbMainWidth;
-            g.DrawLine(gridLineColor, pbMainPaddingX + xLineOfXYaxis, pbMainPaddingY, pbMainPaddingX + xLineOfXYaxis, pbMainPaddingY + pbMainHeight);
+            float xL = -GraphComponent.MainWidth;
+            g.DrawLine(gridLineColor, GraphComponent.MainPaddingX + xLineOfXYaxis, GraphComponent.MainPaddingY, 
+                GraphComponent.MainPaddingX + xLineOfXYaxis, GraphComponent.MainPaddingY + GraphComponent.MainHeight);
 
-            for ( int i = 0; i < yAxisLineCount; i++ )
+            for ( int i = 0; i < GraphComponent.YAxisLineCount; i++ )
             {
                 // Iterator에 Step 곱연산
                 float yy = i * yStep;
 
                 // y Step 만큼 구분하여 Count 만큼의 선을 그림
-                PointF beginPoint = new PointF(pbMainPaddingX + xLineOfXYaxis - xL, pbMainPaddingY + yy);
-                PointF endPoint = new PointF(pbMainPaddingX + xLineOfXYaxis, pbMainPaddingY + yy);
+                PointF beginPoint = new PointF(GraphComponent.MainPaddingX + xLineOfXYaxis - xL, GraphComponent.MainPaddingY + yy);
+                PointF endPoint = new PointF(GraphComponent.MainPaddingX + xLineOfXYaxis, GraphComponent.MainPaddingY + yy);
                 g.DrawLine(gridLineColor, beginPoint, endPoint);
             }
 
             var drawFont = new Font(FontNameD, 10);
-            var drawBrush = new SolidBrush(Color.Black);
-            float ssx = pbMainPaddingX; // top left X margin
-            float ssy = pbMainPaddingY + pbMainHeight + 5; // top left Y margin
+            var drawBrush = new SolidBrush(GraphComponent.ForegroundColor);
+            float ssx = GraphComponent.MainPaddingX; // top left X margin
+            float ssy = GraphComponent.MainPaddingY + GraphComponent.MainHeight + 5; // top left Y margin
             var drawStringFormat = new StringFormat();
 
             // x String
-            const double MhzScale = 1e6;
-            double vv1 = GraphParameterDummy.Instance.Freq_Start / MhzScale; // Mhz로
-            var xString1 = string.Format("{0:0.0}", vv1);
-            if (vv1 < 0.1)
+            if (GraphComponent.IsVisibleXaxis)
             {
-                xString1 = Util.GetFreqStringWithUnit(GraphParameterDummy.Instance.Freq_Start, 0);
+                // Mhz Scale로 변환하여 표현
+                const double MhzScale = 1e6;
+                var xString1 = string.Format("{0:0.0}", GraphComponent.FreqStart / MhzScale);
+                var xString2 = string.Format("{0:0.0}", GraphComponent.FreqCenter / MhzScale);
+                var xString3 = string.Format("{0:0.0}", GraphComponent.FreqStop / MhzScale);
+
+                g.DrawString(xString1, drawFont, drawBrush, ssx, ssy, drawStringFormat);
+                ssx = GraphComponent.MainPaddingX + 5 * xStep - 17;
+                g.DrawString(xString2, drawFont, drawBrush, ssx, ssy, drawStringFormat);
+                ssx = GraphComponent.MainPaddingX + xLineOfXYaxis - xL;
+                drawStringFormat.FormatFlags = StringFormatFlags.DirectionRightToLeft;
+                g.DrawString("(MHz)", drawFont, drawBrush, ssx, ssy, drawStringFormat);
+                g.DrawString(xString3, drawFont, drawBrush, ssx - 40, ssy, drawStringFormat);
             }
-            var xString2 = string.Format("{0:0.0}", GraphParameterDummy.Instance.Freq_Center / MhzScale);
-            var xString3 = string.Format("{0:0.0}", GraphParameterDummy.Instance.Freq_Stop / MhzScale);
 
-            g.DrawString(xString1, drawFont, drawBrush, ssx, ssy, drawStringFormat);
-            ssx = pbMainPaddingX + 5 * xStep - 17;
-            g.DrawString(xString2, drawFont, drawBrush, ssx, ssy, drawStringFormat);
-            ssx = pbMainPaddingX + xLineOfXYaxis - xL;
-            drawStringFormat.FormatFlags = StringFormatFlags.DirectionRightToLeft;
-            g.DrawString("(MHz)", drawFont, drawBrush, ssx, ssy, drawStringFormat);
-            g.DrawString(xString3, drawFont, drawBrush, ssx - 40, ssy, drawStringFormat);
-
-            ssx = pbMainPaddingX;
-            const int count = 11;
+            ssx = GraphComponent.MainPaddingX;
             
             // y String
-            string[] yString = new string[count];
-            for (int i = 0; i < count; i++)
+            string[] yString = new string[GraphComponent.yTotalLines];
+            for (int i = 0; i < GraphComponent.yTotalLines; i++)
             {
                 double temp = startY - i * stepY;
                 yString[i] = string.Format("{0:0.0}", Math.Abs(temp));
-                if (temp < 0.0) yString[i] = "-" + yString[i]; // 음수인 경우 부호
+                // 음수인 경우 부호
+                // 오른쪽에서 왼쪽으로 표시하기 때문에 부호 붙이는 위치 반대로
+                if (temp < 0.0) yString[i] = yString[i] + "-"; 
                 float yy = i * yStep;
-                ssy = pbMainPaddingY + yy;
+                ssy = GraphComponent.MainPaddingY + yy;
                 if (i == 0)
                 {
+                    var unitDrawBrush = GraphComponent.YAxisUnitTextColor;
                     drawStringFormat.FormatFlags = 0;
-                    g.DrawString("(dBm)", drawFont, drawBrush, 0, ssy - 9 - 15, drawStringFormat); // 단위
+                    g.DrawString("(dBm)", drawFont, unitDrawBrush, 0, ssy - 9 - 15, drawStringFormat); // 단위
                 }
                 drawStringFormat.FormatFlags = StringFormatFlags.DirectionRightToLeft;
                 g.DrawString(yString[i], drawFont, drawBrush, ssx, ssy - 9, drawStringFormat);
@@ -326,6 +331,28 @@ namespace FormGraphLib
             else if (y < -LimitY) y = -LimitY;
 
             return 0;
+        }
+
+        private void MakeSampleData(ref double[] data)
+        {
+            // Generate Sample Data
+            Random random = new Random();
+            const int MaxSample = 2002;
+
+            // Draw Random (아무 신호가 없는 잡음을 표현)
+            for (int i = 0; i < MaxSample; i++)
+            {
+                int value = random.Next(-67, -53);
+
+                data[i] = value;
+            }
+
+            // Draw Linear
+            //for (int i = 0; i < MaxSample; i++)
+            //{
+            //    // -100 ~ 0
+            //    data[i] = -100 + i * 0.05;
+            //}
         }
     }
 }

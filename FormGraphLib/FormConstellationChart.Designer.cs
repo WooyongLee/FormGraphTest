@@ -36,7 +36,7 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(MaxWidth, MaxHeight);
+            this.pictureBox1.Size = new System.Drawing.Size(this.Width, this.Height);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -48,7 +48,6 @@
             this.Name = "FormConstellationChart";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion
