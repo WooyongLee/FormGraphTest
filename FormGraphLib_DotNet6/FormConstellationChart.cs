@@ -3,7 +3,6 @@
     public partial class FormConstellationChart : UserControl
     {
         private bool isLoaded = false;
-
         public FormConstellationChart()
         {
             InitializeComponent();
@@ -11,6 +10,9 @@
             this.pictureBox1.Paint += PictureBox1_Paint;
         }
 
+        // Paint Event를 등록하는 시점이 InitializeComponent() 시점이므로
+        // 재대로 Paint()가 1회 이상 호출하여 PictureBox에 Graphics 객체에 따른 Shape가 Rendering 되기 위해서는
+        // Loaded 시 최소 1회 Refresh() 필요
         public override void Refresh()
         {
             base.Refresh();
@@ -27,12 +29,18 @@
 
                 this.Initform();
 
-                if (ConstellationComponent.IsShowSample) MakeDataForTest();
+                if (ConstellationComponent.IsShowSample)
+                {
+                    MakeDataForTest();
+                }
             }
 
-            this.Draw(e.Graphics);
+            pictureBox1.Invoke(new Action(() =>
+            {
+                this.Draw(e.Graphics);
 
-            pictureBox1.Invalidate();
+                pictureBox1.Invalidate();
+            }));
         }
 
         public void Initform()

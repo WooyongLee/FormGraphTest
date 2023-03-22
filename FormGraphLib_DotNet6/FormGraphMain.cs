@@ -36,11 +36,21 @@ namespace FormGraphLib_DotNet6
                 isLoaded = true;
 
                 this.Initform();
+
+                return;
             }
 
-            this.Draw(e.Graphics);
+            this.Invoke(new Action(() =>
+            {
+                if ( pictureBox1.IsDisposed )
+                {
+                    return;
+                }
 
-            pictureBox1.Invalidate();
+                this.Draw(e.Graphics);
+
+                pictureBox1.Invalidate();
+            }));
         }
 
         public void Initform()
