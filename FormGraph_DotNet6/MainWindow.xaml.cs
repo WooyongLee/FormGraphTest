@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FormGraphLib_DotNet6;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,35 @@ namespace FormGraph_DotNet6
     /// </summary>
     public partial class MainWindow : Window
     {
+        bool bToggled = true;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            GraphComponent.MaxWidth = 800;
+            GraphComponent.MaxHeight = 400;
+        }
+
+        private void ChangeCHartButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (bToggled)
+            {
+                FormGraphChart.Visibility = Visibility.Hidden;
+                FormConstellationChart.Visibility = Visibility.Visible;
+            }
+
+            else
+            {
+                FormGraphChart.Visibility = Visibility.Visible;
+                FormConstellationChart.Visibility = Visibility.Hidden;
+            }
+            bToggled = !bToggled;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            GraphChart.Refresh();
         }
     }
 }
