@@ -7,9 +7,34 @@
         xmlns:local="clr-namespace:FormGraph"
         mc:Ignorable="d"
         Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="30"></Setter>
+            <Setter Property="Width" Value="90"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" BorderBrush="Brown" BorderThickness="2" Background="DarkGreen">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
+                            <!--HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>-->
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="Red"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
     <Grid>
         <StackPanel Orientation="Vertical">
-            <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100"></ToggleButton>
+            <Button x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="90"></Button>
             <Grid>
                 <WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
