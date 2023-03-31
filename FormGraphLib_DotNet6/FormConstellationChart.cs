@@ -7,7 +7,10 @@
         {
             InitializeComponent();
 
-            this.pictureBox1.Paint += PictureBox1_Paint;
+            if (pictureBox1 is not null)
+            {
+                pictureBox1.Paint += PictureBox1_Paint;
+            }
         }
 
         // Paint Event를 등록하는 시점이 InitializeComponent() 시점이므로

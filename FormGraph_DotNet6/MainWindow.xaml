@@ -10,8 +10,17 @@
         Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100"></ToggleButton>
             <Grid>
+                <StackPanel Orientation="Horizontal" >
+                    <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100" Panel.ZIndex="1"></ToggleButton>
+                    
+                    <ComboBox Width="100" Height="30" Panel.ZIndex="3" IsHitTestVisible="True">
+                        <ComboBoxItem Content="aaa"></ComboBoxItem>
+                        <ComboBoxItem Content="bbb"></ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <Grid Panel.ZIndex="2">
                 <WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
                 </WindowsFormsHost>
@@ -20,6 +29,16 @@
                     <form:FormConstellationChart x:Name="ConstellationChart"></form:FormConstellationChart>
                 </WindowsFormsHost>
             </Grid>
+            <!--<Button x:Name="ContextMenuButton" Click="ContextMenuButton_Click" Content="Context" Height="30" Width="100" HorizontalAlignment="Right">
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <ComboBox Width="100" Height="30">
+                            <ComboBoxItem Content="aaa"></ComboBoxItem>
+                            <ComboBoxItem Content="bbb"></ComboBoxItem>
+                        </ComboBox>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>-->
         </StackPanel>
     </Grid>
 </Window>

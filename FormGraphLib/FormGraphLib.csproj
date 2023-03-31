@@ -44,6 +44,8 @@
   <ItemGroup>
     <Compile Include="Components\Common.cs" />
     <Compile Include="Components\ConstellationComponent.cs" />
+    <Compile Include="Components\Marker.cs" />
+    <Compile Include="Components\Trace.cs" />
     <Compile Include="FormConstellationChart.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -59,6 +61,7 @@
     <Compile Include="Components\GraphComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="Util\Unit1000String.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>

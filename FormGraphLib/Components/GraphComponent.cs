@@ -138,6 +138,13 @@ namespace FormGraphLib
         /// </summary>
         public static bool IsShowSample = true;
 
+        // Markers
+        public static Marker[] MarkerN;
+
+        // Traces
+        public static Trace[] TraceN;
+
+        // 초기화
         public static void Init()
         {
             FreqCenter = FreqInitCenter;
@@ -148,6 +155,33 @@ namespace FormGraphLib
             MainWidth = MaxWidth * 5 / 6;
             MainHeight = MaxHeight * 5 / 7;
             MainPaddingY = BasePaddingY;
+
+            // Marker 배열 초기화
+            if (MarkerN == null)
+            {
+                MarkerN = new Marker[Marker.MaxMarkerCount];
+                for ( int i = 0; i < Marker.MaxMarkerCount ; i++ )
+                {
+                    MarkerN[i] = new Marker();
+                }
+            }
+
+            // Trace 배열 초기화
+            if (TraceN == null)
+            {
+                TraceN = new Trace[Trace.MAX_TRACE_COUNT];
+                for ( int i = 0; i < Trace.MAX_TRACE_COUNT; i++)
+                {
+                    TraceN[i] = new Trace();
+
+                    // Trace Data 초기화
+                    int dataLength = TraceN[i].data.Length;
+                    for ( int j = 0; j < dataLength; j++ )
+                    {
+                        TraceN[i].data[j] = 0.0;
+                    }
+                }
+            }
         }
     }
 }

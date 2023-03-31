@@ -51,5 +51,10 @@ namespace FormGraph_DotNet6
         {
             GraphChart.Refresh();
         }
+
+        private void ContextMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -28,6 +28,11 @@ namespace FormGraphLib_DotNet6
             this.pictureBox1.Refresh();
         }
 
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+        }
+
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             // Load가 먹지 않아서 Paint Event 호출 시 초기화

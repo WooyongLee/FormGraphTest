@@ -13,12 +13,120 @@ namespace FormGraphLib
     public partial class FormGraphMain: UserControl
     {
         public const string FontNameD = "Microsoft Sans Serif";
+
         private bool isLoaded = false;
+
+        // Dragging variable for Marker
+        bool isDragOn = false;
+        int mouseX = 0; // For Dragging
+        int mouseY = 0;
+        int selectedMarkerIdx = 0;
+        
         public FormGraphMain()
         {
             InitializeComponent();
 
             this.pictureBox1.Paint += PictureBox1_Paint;
+            this.pictureBox1.MouseMove += PictureBox1_MouseMove;
+            this.pictureBox1.MouseDown += PictureBox1_MouseDown;
+            this.pictureBox1.MouseUp += PictureBox1_MouseUp;
+        }
+
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            isDragOn = false;
+
+            // To Do :: Zero Span인 경우 수행하지 않음
+
+            if (selectedMarkerIdx == -1)
+            {
+                return;
+            }
+
+            int x = e.X;
+            int y = e.Y;
+            int TX = x - GraphComponent.MainPaddingX;
+            int TY = y - GraphComponent.MainPaddingY;
+
+            int limitX = x + GraphComponent.MaxWidth - 1;
+            if (TX < 0) TX = 0;
+            if (TX > limitX) TX = limitX;
+
+            var marker = GraphComponent.MarkerN[selectedMarkerIdx];
+            marker.LX = TX;
+
+
+
+        }
+
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            // To Do :: Zero Span인 경우 수행하지 않음
+
+            int x = e.X;
+            int y = e.Y;
+            int TX = x - GraphComponent.MainPaddingX;
+            int TY = y - GraphComponent.MainPaddingY;
+
+            int limitX = x + GraphComponent.MaxWidth - 1;
+            if (TX < 0) return;
+            if (TX > limitX) return;
+
+            int tempidx = -1;
+            int min = 100000;
+
+            // 클릭한 지점과 가장 가까운 Marker를 찾기 위함
+            for (int i = Marker.MaxMarkerCount - 1; i >= 0; i--)
+            {
+                // To Do :: Peak 설정이 Peak 또는 Min 일 시, 작동안되도록 하기
+
+                var marker = GraphComponent.MarkerN[i];
+                if (marker.eMarkerType != EMarkerType.Fixed)
+                {
+                    continue;
+                }
+
+                if (marker.IsTurnOn)
+                {
+                    continue;
+                }
+
+                int d = Math.Abs(TX - marker.LX);
+                if (d < min)
+                {
+                    min = d;
+                    tempidx = i;
+                }
+            } // end for
+
+            // Marker가 클릭한 위치로 부터 일정 거리 안쪽에 있을 경우
+            if (min < 5)
+            {
+                var marker = GraphComponent.MarkerN[tempidx];
+                
+                if (marker.eMarkerType == EMarkerType.Fixed)
+                {
+                    return;
+                }
+
+                isDragOn = true;
+                selectedMarkerIdx = tempidx;
+            }
+
+        }
+
+        // Mouse Move
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            int x = e.X;
+            int y = e.Y;
+            int TX = x - GraphComponent.MainPaddingX;
+            int limitX = x + GraphComponent.MaxWidth - 1;
+            if (TX < 0) return;
+            if (TX > limitX) return;
+
+            mouseX = x;
+            mouseY = y;
         }
 
         public override void Refresh()
@@ -36,11 +144,21 @@ namespace FormGraphLib
                 isLoaded = true;
 
                 this.Initform();
+
+                return;
             }
 
-            this.Draw(e.Graphics);
+            this.Invoke(new Action(() =>
+            {
+                if (pictureBox1.IsDisposed)
+                {
+                    return;
+                }
 
-            pictureBox1.Invalidate();
+                this.Draw(e.Graphics);
+
+                pictureBox1.Invalidate();
+            }));
         }
 
         public void Initform()
@@ -65,6 +183,10 @@ namespace FormGraphLib
             // Draw Data Trace
             // Trace 1개만 활성화 되어있다고 가정
             DrawTrace(g, 0);
+
+            DrawMarker(g);
+
+            DrawMouseMove(g);
         }
 
         // Trace가 여러개 있을 때에 대한 Draw함수, 일단 단일 Trace에 대해서만 도시
@@ -305,6 +427,251 @@ namespace FormGraphLib
             } // end for
         }
 
+        // Marker를 도시함
+        private void DrawMarker(Graphics g)
+        {
+            int ix = 0;
+
+            if (GraphComponent.IsShowSample)
+            {
+                MakeSampleMarker();
+            }
+
+            // Zero Span일 때 미도시
+
+            // 선택된 마커가 없을 때 미도시
+
+            // 추후 가져온 마커로 설정, 일단 그냥 생성
+            Marker marker = GraphComponent.MarkerN[ix];
+
+            if (marker == null)
+            {
+                return;
+            }
+
+            if ( !marker.IsTurnOn)
+            {
+                return;
+            }
+
+            // 일단 0 번째 인자로 설정
+            Pen Pen1 = Marker.LineColor[ix];
+            Color color1 = Marker.LineColor2[ix];
+
+            // To Do :: LX 및 LY 할당
+            int LLX = 100; 
+            int LLY = 0; 
+            if (LLX >= 1000) LLX = 1000;
+            if (LLX < 0) LLX = 0;
+
+            int MX = LLX + GraphComponent.MainPaddingX;
+            int MY = LLY + GraphComponent.MainPaddingY;
+
+            // Sample Span
+            int sampleSpan = 1001;
+            var sp = sampleSpan - 1;
+            double span1PixelHz = GraphComponent.SpanFreq / sp;
+            long temp = (long)((double)(marker.LX - sp / 2) * span1PixelHz);
+            double Hz1 = GraphComponent.FreqCenter + temp;
+            string ss = Unit1000String.GetFreqStringWithUnit(Hz1, 0);
+
+            var wType = marker.eMarkerType;
+            // Delta인 경우에 추가적인 string 표시
+            if (wType == EMarkerType.Delta)
+            {
+                // delta target relative index
+                var rix = marker.RelativeIndex;
+                if ( rix != ix)
+                {
+                    // delta target marker에 대한 hz를 도시
+                    double Hz2 = (LLX - GraphComponent.MarkerN[rix].LX) * span1PixelHz;
+                    ss = Unit1000String.GetFreqStringWithUnit(Hz2, 0);
+                    ss = "∆ " + ss;
+                }
+            }
+
+            int tix = marker.TargetTraceIndex;
+            int td = 0; // TraceN[tix].WorkDetectorLL
+            int ixx = marker.LX;
+            if (td == 0)
+            {
+                ixx = marker.LX * 2 + 1;
+            }
+            double val_Y = -((double)GraphComponent.TraceN[tix].data[ixx] + GraphComponent.AmpOffset);
+            
+            string sss = string.Format("{0:0.0}", -val_Y);
+
+            float step = 1.0f;
+            int stepi = (int)step;
+            double scale = GraphComponent.AmpScaleDiv * GraphComponent.AmpScaleDivRatio;
+            scale = 1 / scale;
+            double yy = val_Y;
+            double yy2 = 0;
+            yy2 += GraphComponent.AmpRefLevel;
+            yy += yy2;
+            yy *= scale * ((float)GraphComponent.MainHeight / 100);
+
+            if ( wType == EMarkerType.Fixed )
+            {
+                PointF beginPoint4 = new PointF((float)MX, GraphComponent.MainPaddingY);
+                PointF endPoint4 = new PointF((float)MX, GraphComponent.MainPaddingY + GraphComponent.MainHeight);
+                Pen Pen2 = new Pen(Color.RoyalBlue, 1);
+
+                g.DrawLine(Pen1, beginPoint4, endPoint4);
+            }
+
+            double posY = GraphComponent.MainPaddingY + yy;
+            if ( CheckY(ref posY, GraphComponent.MaxHeight) != 0) //  y에 대한 limitaion
+            {
+                return;
+            }
+
+            // // 마름모 및 안에 문자열을 도시하지 않음 - 이와 관련한 이유에 대해서 별다른 설명이 없는듯
+            // const int TriangleH = 15;
+            // Point[] TriangleInv = new Point[] { new Point(-9, -TriangleH), new Point(0, -TriangleH * 2), new Point(9, -TriangleH), new Point(0, 0) };
+            // for (int i = 0; i < 4; i++)
+            // {
+            //     TriangleInv[i].X += MX;
+            //     TriangleInv[i].Y += (int)posY;
+            // }
+            // SolidBrush brush = new SolidBrush(color1);
+            // g.DrawPolygon(Pen1, TriangleInv);
+                
+            // Font drawFont = new Font(FontNameD, 10);
+            // SolidBrush drawBrush = new SolidBrush(color1);
+            // float ssx = (float)(marker.LX + GraphComponent.MainPaddingX);
+            // float ssy = (float)GraphComponent.MainHeight - GraphComponent.MainPaddingY - 17;
+            // if ( posY >= ssy)
+            // {
+            //     ssy = (float)GraphComponent.MainPaddingY + 4;
+            // }
+            // StringFormat drawFormat = new StringFormat();
+            // // drawFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+                
+            // // show str. number in diamond
+            // ssx = (float)GraphComponent.MainPaddingX + marker.LX;
+            // drawFormat.FormatFlags = 0;
+            // string ssN = string.Format("{0}", ix + 1);
+            // g.DrawString(ssN, drawFont, drawBrush, ssx - 5 * ssN.Length, (int)posY - 22, drawFormat);
+                
+            // ssx = (float)(GraphComponent.MainPaddingX + marker.LX - 16);
+            // ssy = (float)posY - TriangleH - 16;
+            // drawFormat.FormatFlags = 0;
+
+            // if ( wType == EMarkerType.Fixed)
+            // {
+            //     string ssf = "F";
+            //     g.DrawString(ssf, drawFont, drawBrush, ssx + 12, GraphComponent.MainPaddingY - 16, drawFormat);
+            // }
+        }
+
+        // Mouse Move 
+        private void DrawMouseMove(Graphics g)
+        {
+            // To Do :: Selected Marker가 없는 경우에 대한 처리
+            // To Do :: Zero Span인 경우에 대한 처리
+            
+            if (!isDragOn)
+            {
+                return;
+            }
+
+            if ( mouseX < GraphComponent.MainPaddingX || mouseX >= GraphComponent.MainWidth + GraphComponent.MainPaddingX)
+            {
+                return;
+            }
+
+            Pen LineColor = Marker.LineColor[selectedMarkerIdx];
+            Color color = Marker.LineColor2[selectedMarkerIdx];
+
+            int LLX = mouseX - GraphComponent.MainPaddingX;
+            if (LLX >= 1000) LLX = 1000;
+            if (LLX < 0) LLX = 0;
+
+            GraphComponent.MarkerN[selectedMarkerIdx].LX = LLX;
+
+            // To Do :: Draw Marker 부분과 공통된 부분의 코드로 확인해보고 하나의 함수로 만들기
+            int sampleSpan = 1001;
+            var sp = sampleSpan - 1;
+            double span1PixelHz = GraphComponent.SpanFreq / sp;
+            long temp = (long)((double)(LLX - sp / 2) * span1PixelHz);
+            double Hz1 = GraphComponent.FreqCenter + temp;
+            string ss = Unit1000String.GetFreqStringWithUnit(Hz1, 0);
+
+            GraphComponent.MarkerN[selectedMarkerIdx].Freq = Hz1;
+            var wType = GraphComponent.MarkerN[selectedMarkerIdx].eMarkerType;
+            if (wType == EMarkerType.Delta)
+            {
+                int rix = GraphComponent.MarkerN[selectedMarkerIdx].RelativeIndex;
+                if ( rix != selectedMarkerIdx)
+                {
+                    double Hz2 = (LLX - GraphComponent.MarkerN[rix].LX ) * span1PixelHz;
+                    ss = Unit1000String.GetFreqStringWithUnit(Hz2, 0);
+                    ss = "∆ " + ss;
+                }
+            }
+
+            int tix = GraphComponent.MarkerN[selectedMarkerIdx].TargetTraceIndex;
+            int td = GraphComponent.TraceN[tix].WorkDetectorLL;
+            int ixx = LLX;
+            if (td == 0) ixx = LLX * 2 + 1;
+            double valY = -((double)GraphComponent.TraceN[tix].data[ixx] + GraphComponent.AmpOffset);
+            string sss = string.Format("{0:0.0}", -valY);
+
+            float step = 1.0f;
+            int stepi = (int)step;
+            double scale = GraphComponent.AmpScaleDiv * GraphComponent.AmpScaleDivRatio;
+            scale = 1 / scale;
+            double yy = valY;
+            double yy2 = 0;
+            yy2 += GraphComponent.AmpRefLevel;
+            yy += yy2;
+            yy *= scale * ((float)GraphComponent.MainHeight / 100);
+
+            const int TriangleH = 19;
+
+            PointF beginPoint4 = new PointF((float)mouseX, GraphComponent.MainPaddingY);
+            PointF endPoint4 = new PointF((float)mouseX, GraphComponent.MainPaddingY + GraphComponent.MainHeight);
+            g.DrawLine(LineColor, beginPoint4, endPoint4);
+
+            double posY = GraphComponent.MainPaddingY + yy;
+            if (CheckY(ref posY, GraphComponent.MaxHeight) != 0)
+            {
+                return;
+            }
+
+            Point[] TriangleInv = new Point[] { new Point(-10, -TriangleH), new Point(10, -TriangleH), new Point(0, 0) };
+            for (int i = 0; i < 3; i++)
+            {
+                TriangleInv[i].X += mouseX;
+                TriangleInv[i].Y += (int)posY;
+            }
+            g.DrawPolygon(LineColor, TriangleInv);
+
+            Font drawFont = new Font(FontNameD, 10);
+            SolidBrush drawBrush = new SolidBrush(color);
+            float ssx = (float)mouseX;
+            float ssy = (float)GraphComponent.MainHeight - GraphComponent.MainPaddingY - 17;
+            if (posY >= ssy)
+            {
+                ssy = (float)GraphComponent.MainPaddingY + 4;
+            }
+            StringFormat drawFormat = new StringFormat();
+            drawFormat.FormatFlags = StringFormatFlags.DirectionVertical;
+            g.DrawString(ss, drawFont, drawBrush, ssx, ssy, drawFormat);
+
+            ssx = (float)(GraphComponent.MainPaddingX + LLX - 16);
+            ssy = (float)posY - TriangleH - 16;
+            drawFormat.FormatFlags = 0;
+            g.DrawString(sss, drawFont, drawBrush, ssx, ssy, drawFormat);
+
+            if (wType == EMarkerType.Fixed)
+            {
+                string ssf = "F";
+                g.DrawString(ssf, drawFont, drawBrush, ssx + 12, GraphComponent.MainPaddingY - 16, drawFormat);
+            }
+        }
+
         // y의 Limit 값과 비교하여 y의 값을 제한함
         private int CheckY(ref double y, double LimitY)
         {
@@ -353,6 +720,16 @@ namespace FormGraphLib
             //    // -100 ~ 0
             //    data[i] = -100 + i * 0.05;
             //}
+        }
+
+        private void MakeSampleMarker()
+        {
+            GraphComponent.MarkerN[0].IsTurnOn = true;
+
+            GraphComponent.MarkerN[0].eMarkerType = EMarkerType.Normal;
+
+            GraphComponent.MarkerN[0].LX = 100;
+            GraphComponent.MarkerN[0].LY = 100;
         }
     }
 }

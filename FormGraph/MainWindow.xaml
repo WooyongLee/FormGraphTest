@@ -17,7 +17,7 @@
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Border x:Name="border" BorderBrush="Brown" BorderThickness="2" Background="DarkGreen">
                             <ContentPresenter HorizontalAlignment="Center"
-                                                            VerticalAlignment="Center"/>
+                                                        VerticalAlignment="Center"/>
                             <!--HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>-->
                         </Border>
@@ -34,8 +34,18 @@
     
     <Grid>
         <StackPanel Orientation="Vertical">
-            <Button x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="90"></Button>
-            <Grid>
+            <Canvas Height="auto" Width="auto">
+                <Button x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="90" 
+                        Canvas.Top="40" Canvas.Left="570">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleY="1"></ScaleTransform>
+                        <!--<ScaleTransform ScaleY="-1"></ScaleTransform>-->
+                    </Button.RenderTransform>
+                </Button>
+            </Canvas>
+
+            <!--<local:SimpleLineChart x:Name="SimpleLineCHart"></local:SimpleLineChart>-->
+            <Grid Visibility="Visible">
                 <WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
                 </WindowsFormsHost>
