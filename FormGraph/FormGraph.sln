@@ -7,9 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormGraph", "FormGraph.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormGraphLib", "..\FormGraphLib\FormGraphLib.csproj", "{9250FDDD-FA86-4922-9E64-22762E084403}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormGraph_DotNet6", "..\FormGraph_DotNet6\FormGraph_DotNet6.csproj", "{A83B7E2E-BEE0-411B-BE76-FD7F9B4E2E43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormGraph_DotNet6", "..\FormGraph_DotNet6\FormGraph_DotNet6.csproj", "{A83B7E2E-BEE0-411B-BE76-FD7F9B4E2E43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormGraphLib_DotNet6", "..\FormGraphLib_DotNet6\FormGraphLib_DotNet6.csproj", "{4962E94E-09C1-4935-A769-312469F518B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormGraphLib_DotNet6", "..\FormGraphLib_DotNet6\FormGraphLib_DotNet6.csproj", "{4962E94E-09C1-4935-A769-312469F518B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLGraphLib_DotNet6", "..\GLGraphLib_DotNet6\GLGraphLib_DotNet6.csproj", "{EFCC81EC-77AC-411E-BBFA-49B3D15D6CEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{4962E94E-09C1-4935-A769-312469F518B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4962E94E-09C1-4935-A769-312469F518B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4962E94E-09C1-4935-A769-312469F518B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFCC81EC-77AC-411E-BBFA-49B3D15D6CEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFCC81EC-77AC-411E-BBFA-49B3D15D6CEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFCC81EC-77AC-411E-BBFA-49B3D15D6CEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFCC81EC-77AC-411E-BBFA-49B3D15D6CEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

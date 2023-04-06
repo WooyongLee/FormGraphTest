@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
-                xmlns:form="clr-namespace:FormGraphLib_DotNet6;assembly=FormGraphLib_DotNet6"
+        xmlns:form="clr-namespace:FormGraphLib_DotNet6;assembly=FormGraphLib_DotNet6"
+        xmlns:glgraph="clr-namespace:GLGraphLib_DotNet6;assembly=GLGraphLib_DotNet6"
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         mc:Ignorable="d"
         Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
@@ -21,13 +22,20 @@
                 </StackPanel>
             </Grid>
             <Grid Panel.ZIndex="2">
-                <WindowsFormsHost x:Name="FormGraphChart" >
+                <glgraph:ConstellationChart x:Name="ConstellationChartControl" 
+                                            Width="300" Height="300" HorizontalAlignment="Left" IsLoadSample="True"  > 
+                </glgraph:ConstellationChart>
+
+                <glgraph:SpectrumChart x:Name="SpectrumChartControl" Visibility="Hidden"
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True" >
+                </glgraph:SpectrumChart>
+                <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
                 </WindowsFormsHost>
 
                 <WindowsFormsHost x:Name="FormConstellationChart" Visibility="Hidden">
                     <form:FormConstellationChart x:Name="ConstellationChart"></form:FormConstellationChart>
-                </WindowsFormsHost>
+                </WindowsFormsHost>-->
             </Grid>
             <!--<Button x:Name="ContextMenuButton" Click="ContextMenuButton_Click" Content="Context" Height="30" Width="100" HorizontalAlignment="Right">
                 <Button.ContextMenu>

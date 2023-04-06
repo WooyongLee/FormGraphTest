@@ -1,18 +1,5 @@
 ﻿using FormGraphLib_DotNet6;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FormGraph_DotNet6
 {
@@ -31,25 +18,27 @@ namespace FormGraph_DotNet6
             GraphComponent.MaxHeight = 400;
         }
 
+        // Lib Path :: C:\Solutions\Test\FormGraphTest\GLGraphLib_DotNet6\bin\Debug\net6.0-windows
+
         private void ChangeCHartButton_Click(object sender, RoutedEventArgs e)
         {
             if (bToggled)
             {
-                FormGraphChart.Visibility = Visibility.Hidden;
-                FormConstellationChart.Visibility = Visibility.Visible;
+                ConstellationChartControl.Visibility = Visibility.Hidden;
+                SpectrumChartControl.Visibility = Visibility.Visible;
             }
 
             else
             {
-                FormGraphChart.Visibility = Visibility.Visible;
-                FormConstellationChart.Visibility = Visibility.Hidden;
+                ConstellationChartControl.Visibility = Visibility.Visible;
+                SpectrumChartControl.Visibility = Visibility.Hidden;
             }
             bToggled = !bToggled;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            GraphChart.Refresh();
+            //GraphChart.Refresh();
         }
 
         private void ContextMenuButton_Click(object sender, RoutedEventArgs e)

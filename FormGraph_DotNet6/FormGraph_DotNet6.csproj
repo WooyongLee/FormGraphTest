@@ -9,7 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SharpGL.WPF" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FormGraphLib_DotNet6\FormGraphLib_DotNet6.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="GLGraphLib_DotNet6">
+      <HintPath>..\GLGraphLib_DotNet6\bin\Debug\net6.0-windows\GLGraphLib_DotNet6.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
