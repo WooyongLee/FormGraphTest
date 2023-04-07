@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,41 +13,8 @@ namespace GLGraphLib_DotNet6
     /// </summary>
     public partial class ConstellationChart : UserControl
     {
+        // drawing iteration
         int iter = 0;
-        const string FONT = "Arial";
-
-        #region Dependency Properties
-        public bool IsLoadSample
-        {
-            get { return (bool)GetValue(IsLoadSampleProperty); }
-            set { SetValue(IsLoadSampleProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsLoadSampleProperty = DependencyProperty.Register(
-            "IsLoadSample",
-            typeof(bool),
-            typeof(ConstellationChart),
-            null
-            );
-        #endregion
-
-        // To Do :: 아래 속성들 모두 Dependency Object로 변경
-        double MinX = -2.0;
-        double MaxX = 2.0;
-
-        double MinY = -2.0;
-        double MaxY = 2.0;
-
-        int NumOfRow = 8; // 한 행의 개수
-        int NumOfColumn = 8; // 한 열의 개수
-
-        // 패딩
-        int PaddingHorizontal = 30;
-        int PaddingVertical = 30;
-
-        // 현재 컨트롤의 너비/높이
-        double CurrentControlWidth = 300;
-        double CurrentControlHeight = 300;
 
         ConstellationComponent component;
 
@@ -55,10 +23,12 @@ namespace GLGraphLib_DotNet6
             InitializeComponent();
 
             component = new ConstellationComponent();
-
+            
             this.SizeChanged += ConstellationChart_SizeChanged;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
             this.openGLControl.Resized += OpenGLControl_Resized;
+
+            this.InitProperty();
         }
 
         private void OpenGLControl_Resized(object sender, OpenGLRoutedEventArgs args)
@@ -94,8 +64,8 @@ namespace GLGraphLib_DotNet6
                 (CurrentControlHeight - (PaddingVertical + PaddingVertical)) / NumOfRow);
 
             // Calculate the starting position for drawing the chart(원점은 7시 기준)
-            int startX = PaddingHorizontal;
-            int startY = PaddingVertical;
+            var startX = PaddingHorizontal;
+            var startY = PaddingVertical;
 
             // Draw the chart
             for (int row = 0; row < NumOfRow; row++)
@@ -103,8 +73,8 @@ namespace GLGraphLib_DotNet6
                 for (int col = 0; col < NumOfColumn; col++)
                 {
                     // Calculate the position of the current square
-                    int x = startX + size * col;
-                    int y = startY + size * row;
+                    var x = startX + size * col;
+                    var y = startY + size * row;
 
                     // Draw the current square
                     gl.Begin(OpenGL.GL_LINE_LOOP);
@@ -122,7 +92,7 @@ namespace GLGraphLib_DotNet6
         // 축에 들어가는 수를 도시함
         private void DrawAxisLabels(OpenGL gl)
         {
-            // font size 를 1회 이상 변경해야 Text가 도시하는 현상이 있음 (해당 구문 제거 시, 축 Text 도시하지 않음)
+            // GLUtil.FONT size 를 1회 이상 변경해야 Text가 도시하는 현상이 있음 (해당 구문 제거 시, 축 Text 도시하지 않음)
             int fontsize = 10;
             if (iter++ > 1) fontsize = 12;
 
@@ -135,10 +105,10 @@ namespace GLGraphLib_DotNet6
             int xAxisXoffset = 10;
             int yAxisYOffset = 10;
 
-            int ScreenMinX = PaddingHorizontal - MarginX - xOffset;
-            int ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal - PaddingHorizontal + xOffset;
-            int ScreenMinY = PaddingVertical - MarginY;
-            int ScreenMaxY = (int)CurrentControlHeight - PaddingVertical - PaddingVertical + MarginY ;
+            var ScreenMinX = PaddingHorizontal - MarginX - xOffset;
+            var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal - PaddingHorizontal + xOffset;
+            var ScreenMinY = PaddingVertical - MarginY;
+            var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical - PaddingVertical + MarginY ;
 
             // Set the color to white
             gl.Color(1.0f, 1.0f, 1.0f);
@@ -190,13 +160,13 @@ namespace GLGraphLib_DotNet6
         }
 
         // Text를 도시함
-        private void DrawText(OpenGL gl, double value, int x, int y, float size = 12.0f)
+        private void DrawText(OpenGL gl, double value, float x, float y, float size = 12.0f)
         {
             // Set String Format
             string strValue = string.Format("{0,5:N1}", value);
 
             // Draw Text
-            gl.DrawText(x, y, 1.0f, 1.0f, 1.0f, FONT, size, strValue);
+            gl.DrawText((int)x, (int)y, 1.0f, 1.0f, 1.0f, GLUtil.FONT, size, strValue);
         }
 
         // Create Sample Data

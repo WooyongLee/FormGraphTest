@@ -537,7 +537,7 @@ namespace FormGraphLib
             // SolidBrush brush = new SolidBrush(color1);
             // g.DrawPolygon(Pen1, TriangleInv);
                 
-            // Font drawFont = new Font(FontNameD, 10);
+            // GLUtil.FONT drawFont = new GLUtil.FONT(FontNameD, 10);
             // SolidBrush drawBrush = new SolidBrush(color1);
             // float ssx = (float)(marker.LX + GraphComponent.MainPaddingX);
             // float ssy = (float)GraphComponent.MainHeight - GraphComponent.MainPaddingY - 17;

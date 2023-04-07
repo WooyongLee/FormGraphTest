@@ -43,7 +43,7 @@
             // FormConstellationChart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.GLUtil.FONT;
             this.Controls.Add(this.pictureBox1);
             this.Name = "FormConstellationChart";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

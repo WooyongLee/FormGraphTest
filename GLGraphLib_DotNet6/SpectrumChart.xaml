@@ -8,6 +8,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <SharpGL:OpenGLControl x:Name="openGLControl" ></SharpGL:OpenGLControl>
+        <SharpGL:OpenGLControl x:Name="openGLControl"
+                               MouseDown="openGLControl_MouseDown"
+                               MouseMove="openGLControl_MouseMove"
+                               MouseUp="openGLControl_MouseUp"></SharpGL:OpenGLControl>
     </Grid>
 </UserControl>

@@ -97,7 +97,7 @@ namespace FormGraphLib
             double[,] CH_X, double[,] CH_Y, 
             Color[] cl, string[] cn, int ChannelCount)
         {
-            Font drawFont = new Font("Arial", 10);
+            GLUtil.FONT drawFont = new GLUtil.FONT("Arial", 10);
             SolidBrush drawBrush2 = ConstellationComponent.GridLineSolidBrush;
             StringFormat drawFormat = new StringFormat();
             drawFormat.FormatFlags = 0;
@@ -135,7 +135,7 @@ namespace FormGraphLib
             // Bottom Hint Menu Visible
             if (ConstellationComponent.IsShowBottom)
             {
-                Font drawFont2 = new Font("Arial", 8);
+                GLUtil.FONT drawFont2 = new GLUtil.FONT("Arial", 8);
                 drawFormat.FormatFlags = 0;
                 int yOffset = 15;
 
@@ -163,7 +163,7 @@ namespace FormGraphLib
         /// <param name="DivideY">분할된 Y 개수</param>
         private void DrawIQConstellationAxis(Graphics g, int BLT_X, int BLT_Y, int bw, int bh, int DivideX, int DivideY)
         {
-            Font drawFont = new Font("Arial", 10);
+            GLUtil.FONT drawFont = new GLUtil.FONT("Arial", 10);
             SolidBrush drawBrush2 = ConstellationComponent.GridLineSolidBrush;
             StringFormat drawFormat = new StringFormat();
             drawFormat.FormatFlags = 0;
