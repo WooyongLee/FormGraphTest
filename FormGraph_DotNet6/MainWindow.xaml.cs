@@ -1,6 +1,9 @@
 ﻿using FormGraphLib_DotNet6;
+using GLGraphLib_DotNet6;
+using System;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace FormGraph_DotNet6
 {
@@ -42,9 +45,59 @@ namespace FormGraph_DotNet6
             //GraphChart.Refresh();
         }
 
-        private void ContextMenuButton_Click(object sender, RoutedEventArgs e)
-        {
+        //private void ContextMenuButton_Click(object sender, RoutedEventArgs e)
+        //{
 
+        //}
+
+        private void TraceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn != null)
+            {
+                var traceNum = ExtractNumber(btn.Name);
+
+                SpectrumChartControl.ShowHideTrace(traceNum - 1);
+            }
+        }
+
+        private void MarkerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn != null)
+            {
+                var markerNum = ExtractNumber(btn.Name);
+
+                SpectrumChartControl.ShowHideMarker(markerNum - 1);
+            }
+        }
+
+        private void FixedMarkerButton_Click(object sender, RoutedEventArgs e)
+        {
+            int fixedMarkerIndex = int.Parse(FixedMarkerTextBox.Text) - 1;
+
+            SpectrumChartControl.SetMarkerFixed(fixedMarkerIndex);
+        }
+
+        private void DeltaMarkerButton_Click(object sender, RoutedEventArgs e)
+        {
+            int sourceIndex = int.Parse(DeltaMarkerSourceTextBox.Text) - 1;
+            int targetIndex = int.Parse(DeltaMarkerTargetTextBox.Text) - 1;
+
+            SpectrumChartControl.SetMarkerDelta(sourceIndex, targetIndex);
+        }
+
+        public static int ExtractNumber(string input)
+        {
+            foreach (char c in input)
+            {
+                if (Char.IsDigit(c))
+                {
+                    // ascii '0' = 48
+                    return c - 48;
+                }
+            }
+            return 0;
         }
     }
 }

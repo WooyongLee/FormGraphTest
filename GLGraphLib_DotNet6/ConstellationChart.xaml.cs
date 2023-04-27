@@ -1,8 +1,4 @@
 using System;
-using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-
 using SharpGL;
 using SharpGL.WPF;
 
@@ -11,7 +7,7 @@ namespace GLGraphLib_DotNet6
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class ConstellationChart : UserControl
+    public partial class ConstellationChart : ChartUserControlBase
     {
         // drawing iteration
         int iter = 0;

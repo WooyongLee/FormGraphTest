@@ -12,7 +12,7 @@
     <Grid>
         <StackPanel Orientation="Vertical">
             <Grid>
-                <StackPanel Orientation="Horizontal" >
+                <StackPanel Orientation="Horizontal" Visibility="Hidden" >
                     <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100" Panel.ZIndex="1"></ToggleButton>
                     
                     <ComboBox Width="100" Height="30" Panel.ZIndex="3" IsHitTestVisible="True">
@@ -21,14 +21,54 @@
                     </ComboBox>
                 </StackPanel>
             </Grid>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Width" Value="40"></Setter>
+                            <Setter Property="Height" Value="22"></Setter>
+                            <Setter Property="Margin" Value="3, 2"></Setter>
+                        </Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+                            <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+                            <Setter Property="Margin" Value="1, 0"></Setter>
+                            <Setter Property="Width" Value="12"></Setter>
+                        </Style>
+                    </StackPanel.Resources>
+                    <Button x:Name="Trace1Button" Content="T 1" Click="TraceButton_Click"></Button>
+                    <Button x:Name="Trace2Button" Content="T 2" Click="TraceButton_Click"></Button>
+                    <Button x:Name="Trace3Button" Content="T 3" Click="TraceButton_Click"></Button>
+                    <Button x:Name="Trace4Button" Content="T 4" Click="TraceButton_Click"></Button>
+                    <Label Margin="5, 0"></Label>
+                    <Button x:Name="Marker1Button" Content="M 1" Click="MarkerButton_Click"></Button>
+                    <Button x:Name="Marker2Button" Content="M 2" Click="MarkerButton_Click"></Button>
+                    <Button x:Name="Marker3Button" Content="M 3" Click="MarkerButton_Click"></Button>
+                    <Button x:Name="Marker4Button" Content="M 4" Click="MarkerButton_Click"></Button>
+                    <Button x:Name="Marker5Button" Content="M 5" Click="MarkerButton_Click"></Button>    
+                    <Label Margin="5, 0"></Label>
+                    <TextBox x:Name="FixedMarkerTextBox" Text="1"></TextBox>
+                    <Button x:Name="FixedMarkerButton" Content="Fixed" Click="FixedMarkerButton_Click"></Button>
+                    <TextBox x:Name="DeltaMarkerSourceTextBox" Text="1"></TextBox>
+                    <TextBlock VerticalAlignment="Center">to</TextBlock>
+                    <TextBox x:Name="DeltaMarkerTargetTextBox" Text="2"></TextBox>
+                    <Button x:Name="DeltaMarkerButton" Content="Delta" Click="DeltaMarkerButton_Click"></Button>
+                </StackPanel>    
+            </Grid>
             <Grid Panel.ZIndex="2">
-                <glgraph:ConstellationChart x:Name="ConstellationChartControl"  
+                <glgraph:BarGraphChart x:Name="BarGraphChartControl" Visibility="Visible"
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True"
+                                       MaxY="0" MinY="-100" MaxX="7" MinX="0">
+                </glgraph:BarGraphChart>
+                
+                <glgraph:ConstellationChart x:Name="ConstellationChartControl"  Visibility="Hidden"
                                             Width="300" Height="300" HorizontalAlignment="Left" IsLoadSample="True" 
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" > 
                 </glgraph:ConstellationChart>
 
-                <glgraph:SpectrumChart x:Name="SpectrumChartControl" Visibility="Hidden"
-                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True" >
+                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Hidden"
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True" 
+                                       RefLevel="0" CenterFrequency="3650.01">
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>

@@ -1,4 +1,4 @@
-<UserControl x:Class="GLGraphLib_DotNet6.ConstellationChart"
+<local:ChartUserControlBase x:Class="GLGraphLib_DotNet6.ConstellationChart"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,4 +10,4 @@
     <Grid>
         <SharpGL:OpenGLControl x:Name="openGLControl" ></SharpGL:OpenGLControl>
     </Grid>
-</UserControl>
+</local:ChartUserControlBase>

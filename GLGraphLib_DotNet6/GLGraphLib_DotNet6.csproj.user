@@ -5,12 +5,18 @@
     <Compile Update="SpectrumChart.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="BarGraphChart.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ConstellationChart.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="SpectrumChart.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="BarGraphChart.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
