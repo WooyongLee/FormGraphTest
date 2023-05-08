@@ -1,8 +1,9 @@
-﻿using System;
+﻿using SharpGL.SceneGraph;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     public class Trace
     {
@@ -29,6 +30,7 @@ namespace GLGraphLib_DotNet6
         {
             if (data[index] == null)
             {
+                // List 초기화 및 기본값(0)으로 채우기
                 data[index] = new List<double>();
                 Enumerable.Range(0, TotalDataLength).ToList().ForEach(i => data[index].Add(0));
             }

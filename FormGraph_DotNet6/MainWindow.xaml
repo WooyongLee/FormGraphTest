@@ -3,26 +3,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
-        xmlns:form="clr-namespace:FormGraphLib_DotNet6;assembly=FormGraphLib_DotNet6"
-        xmlns:glgraph="clr-namespace:GLGraphLib_DotNet6;assembly=GLGraphLib_DotNet6"
+        xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         mc:Ignorable="d"
         Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
     <Grid>
         <StackPanel Orientation="Vertical">
             <Grid>
-                <StackPanel Orientation="Horizontal" Visibility="Hidden" >
-                    <ToggleButton x:Name="ChangeCHartButton" Click="ChangeCHartButton_Click" Content="Toggle Form" Height="30" Width="100" Panel.ZIndex="1"></ToggleButton>
-                    
-                    <ComboBox Width="100" Height="30" Panel.ZIndex="3" IsHitTestVisible="True">
+                <StackPanel Orientation="Horizontal"  Margin="0, 0, 3, 3">
+                    <Button x:Name="SpectrumButton" Content="Spectrum" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
+                    <Button x:Name="ConstellationButton" Content="Constellation"   Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
+                    <Button x:Name="BarButton" Content="Bar" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
+
+                    <ComboBox Width="100" Panel.ZIndex="3" IsHitTestVisible="True" Margin="5, 1">
                         <ComboBoxItem Content="aaa"></ComboBoxItem>
                         <ComboBoxItem Content="bbb"></ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
             </Grid>
-            <Grid>
-                <StackPanel Orientation="Horizontal">
+            <Grid x:Name="SpectrumChartSettingGrid">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
                     <StackPanel.Resources>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Width" Value="40"></Setter>
@@ -53,10 +54,24 @@
                     <TextBlock VerticalAlignment="Center">to</TextBlock>
                     <TextBox x:Name="DeltaMarkerTargetTextBox" Text="2"></TextBox>
                     <Button x:Name="DeltaMarkerButton" Content="Delta" Click="DeltaMarkerButton_Click"></Button>
-                </StackPanel>    
+                    <Button x:Name="MakeSampleButton" Content="Make Sample" Width="auto" Margin="20, 0, 0, 0" 
+                            Click="MakeSampleButton_Click"></Button>
+                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0, 3, 0, 3">
+                        <TextBlock Margin="5, 0, 5, 0">MinX :</TextBlock>
+                        <TextBox x:Name="MinXTextBox" Width="50"></TextBox>
+                        <TextBlock Margin="5, 0, 5, 0">MaxX :</TextBlock>
+                        <TextBox x:Name="MaxXTextBox" Width="50"></TextBox>
+                        <TextBlock Margin="5, 0, 5, 0">MinY :</TextBlock>
+                        <TextBox x:Name="MinYTextBox" Width="50"></TextBox>
+                        <TextBlock Margin="5, 0, 5, 0">MaxY : </TextBlock>
+                        <TextBox x:Name="MaxYTextBox" Width="50"></TextBox>
+                        <Button x:Name="SetMinXYButton" Margin="5, 0" Content=" Set Min X, Y " Click="SetMinXYButton_Click"></Button>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
             <Grid Panel.ZIndex="2">
-                <glgraph:BarGraphChart x:Name="BarGraphChartControl" Visibility="Visible"
+                <glgraph:BarGraphChart x:Name="BarGraphChartControl" Visibility="Hidden"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True"
                                        MaxY="0" MinY="-100" MaxX="7" MinX="0">
                 </glgraph:BarGraphChart>
@@ -66,9 +81,10 @@
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" > 
                 </glgraph:ConstellationChart>
 
-                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Hidden"
-                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True" 
-                                       RefLevel="0" CenterFrequency="3650.01">
+                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible"
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
+                                       CenterFrequency="3650.01" Span="150"
+                                       RefLevel="-20" DivScale="10" >
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>

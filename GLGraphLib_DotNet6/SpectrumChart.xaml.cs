@@ -1,18 +1,12 @@
-﻿using SharpGL.WPF;
-using SharpGL;
-using System.Windows.Controls;
-using System;
-using System.Windows;
-using System.Threading;
-using System.Drawing;
-using SharpGL.SceneGraph;
+﻿using SharpGL;
 using SharpGL.Enumerations;
-using System.Security.Cryptography.X509Certificates;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using SharpGL.WPF;
+using System;
+using System.Drawing;
+using System.Threading;
+using System.Windows.Controls;
 
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     /// <summary>
     /// SpectrumChart.xaml에 대한 상호 작용 논리
@@ -26,7 +20,7 @@ namespace GLGraphLib_DotNet6
         // OpenGL Control Rendering 반복을 체크하는 Iterator 변수
         int prevIter = 0;
         int iter = 0;
-   
+
         #region const
         // Marker Triangle x,y size Property
         const int markerTriangleX = 5;
@@ -47,11 +41,17 @@ namespace GLGraphLib_DotNet6
         Marker marker;
 
         // Color 설정
-        RGBcolor markerColor = new(Color.Red);
-        RGBcolor markerHighlightColor = new(Color.Orange);
+        RGBcolor markerColor = new RGBcolor(Color.Red);
+        RGBcolor markerHighlightColor = new RGBcolor(Color.Orange);
         RGBcolor[] spectrumColors;
 
         ESpectrumChartMode mode;
+
+        #region public
+        public bool IsSetMinMax = false;
+
+        #endregion
+
 
         public SpectrumChart()
         {
@@ -69,13 +69,10 @@ namespace GLGraphLib_DotNet6
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
             this.openGLControl.Resized += OpenGLControl_Resized;
 
-            InitProperty();
-
             spectrumColors = new RGBcolor[4] { spectrumColor1, spectrumColor2, spectrumColor3, spectrumColor4 };
 
             // Dependency Property Set Owner
             IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
-        
         }
 
         private void TimerCallBack(object? state)
@@ -101,8 +98,18 @@ namespace GLGraphLib_DotNet6
 
         private void OpenGLControl_OpenGLDraw(object sender, SharpGL.WPF.OpenGLRoutedEventArgs args)
         {
+            // 초기 값 적용
+            if (iter == 0)
+            {
+                InitProperty();
+            }
+
             // Min, Max 값 적용
-            SetMinMaxXY();
+            if (IsSetMinMax)
+            {
+                SetMinMaxXY();
+                IsSetMinMax = false;
+            }
 
             OpenGL gl = openGLControl.OpenGL;
 
@@ -143,7 +150,7 @@ namespace GLGraphLib_DotNet6
             gl.Flush();
 
             // GL Control 내에서 Draw 할 때 마다 iteration 증가
-            if (iter < 120000) iter++;
+            if (iter < 200000) iter++;
         }
 
         // 스펙트럼의 축을 도시함
@@ -212,7 +219,7 @@ namespace GLGraphLib_DotNet6
 
                 // End x Position
                 valueX = CenterFrequency + Span / 2;
-                screenX =ScreenMaxX - xAxisXoffset * 2;
+                screenX = ScreenMaxX - xAxisXoffset * 2;
 
                 GLUtil.DrawFormattedText(gl, valueX, (int)screenX, (int)ScreenMinY, AxisColor, 5, fontsizeX);
             } // end if (IsShowXaxisText)
@@ -249,7 +256,7 @@ namespace GLGraphLib_DotNet6
 
                 // Bounding Box의 Min/Max 설정
                 float boundingBoxMinX = (float)(CurrentControlWidth / 2 - xBandWidth / 2);
-                float boundingBoxMaxX = (float)(CurrentControlWidth / 2  + xBandWidth / 2);
+                float boundingBoxMaxX = (float)(CurrentControlWidth / 2 + xBandWidth / 2);
                 float boundingBoxMinY = PaddingVertical + 3;
                 float boundingBoxMaxY = (float)(CurrentControlHeight - PaddingVertical - 3);
 
@@ -282,7 +289,7 @@ namespace GLGraphLib_DotNet6
             }
 
             // 전체를 다섯 칸으로 나누고(Carrier Box), 가장 center 칸 제외하고 absolute limit line과 relative limit line을 도시함
-            else if ( mode == ESpectrumChartMode.ACLR)
+            else if (mode == ESpectrumChartMode.ACLR)
             {
                 // Set Blending for Transparency
                 gl.Enable(OpenGL.GL_BLEND);
@@ -292,23 +299,23 @@ namespace GLGraphLib_DotNet6
                 var relLimitLineY = 180.0f + PaddingVertical;
                 var absLimitLineY = 130.0f + PaddingVertical;
 
-                RGBcolor boundingBoxColor = new(Color.ForestGreen);
-                RGBcolor relLimitLineColor = new(Color.SkyBlue);
-                RGBcolor absLimitLineColor = new(Color.Purple);
+                RGBcolor boundingBoxColor = new RGBcolor(Color.ForestGreen);
+                RGBcolor relLimitLineColor = new RGBcolor(Color.SkyBlue);
+                RGBcolor absLimitLineColor = new RGBcolor(Color.Purple);
                 float BoundingOffset = 2;
                 float boundingBoxMinY = PaddingVertical + BoundingOffset;
                 float boundingBoxMaxY = (float)(CurrentControlHeight - PaddingVertical - BoundingOffset);
 
                 // 5개의 영역을 Overlay 하도록 구성
                 int totalBoxSize = 5;
-                for ( int i = 0; i < totalBoxSize; i++)
+                for (int i = 0; i < totalBoxSize; i++)
                 {
                     float boundingBoxMinX = (float)(PaddingHorizontal + (CurrentControlWidth - PaddingHorizontal * 2) * i / totalBoxSize) + BoundingOffset;
                     float boundingBoxMaxX = (float)(PaddingHorizontal + (CurrentControlWidth - PaddingHorizontal * 2) * (i + 1) / totalBoxSize) - BoundingOffset;
 
                     // Draw Bounding Box
                     GLUtil.DrawThickBoundingBox(gl, boundingBoxMinX, boundingBoxMinY, boundingBoxMaxX, boundingBoxMaxY, boundingBoxColor, 3);
-                   
+
                     // Draw Fill Box
                     gl.PolygonMode(FaceMode.FrontAndBack, PolygonMode.Filled);
                     gl.Begin(BeginMode.Quads);
@@ -329,7 +336,7 @@ namespace GLGraphLib_DotNet6
 
                     // Draw Relative Limit Line
                     GLUtil.DrawThickLine(gl, boundingBoxMinX, relLimitLineY, boundingBoxMaxX, relLimitLineY, relLimitLineColor, 3);
-                    
+
                     // Draw Absolute Limit Line
                     GLUtil.DrawThickLine(gl, boundingBoxMinX, absLimitLineY, boundingBoxMaxX, absLimitLineY, absLimitLineColor, 3);
                 }
@@ -338,7 +345,7 @@ namespace GLGraphLib_DotNet6
                 gl.Disable(OpenGL.GL_BLEND);
             }
 
-            else if ( mode == ESpectrumChartMode.SEM)
+            else if (mode == ESpectrumChartMode.SEM)
             {
 
             }
@@ -347,7 +354,7 @@ namespace GLGraphLib_DotNet6
         // Data를 도시함
         private void DrawData(OpenGL gl)
         {
-            for (int traceIndex = 0; traceIndex < Trace.MaxTraceCount; traceIndex++) 
+            for (int traceIndex = 0; traceIndex < Trace.MaxTraceCount; traceIndex++)
             {
                 // 해당 Index에 대한 Trace 데이터
                 var traceData = trace.GetData(traceIndex);
@@ -380,7 +387,7 @@ namespace GLGraphLib_DotNet6
 
                         // Set Vertex from current x, y
                         gl.Vertex(currentX, currentY, 0);
-                    } 
+                    }
                     gl.End();
                     #endregion
                 } // end if (traceData != null)
@@ -432,7 +439,7 @@ namespace GLGraphLib_DotNet6
                     {
                         strMarkerText = "Fix " + strMarkerText;
                     }
-                    
+
                     // Delta Mark
                     if (marker.IsDelta(i))
                     {
@@ -466,7 +473,7 @@ namespace GLGraphLib_DotNet6
             int totalMarkerPositionCount = marker.GetTotalPosCount();
 
             // 설정된 모든 Marker를 대상으로 Iteration 수행
-            for (int i = 0; i < totalMarkerPositionCount; i++)
+            for (int i = 0; i < Marker.MaxMarkerCount; i++)
             {
                 var markerPt = marker.GetPoints(i);
 
@@ -529,16 +536,70 @@ namespace GLGraphLib_DotNet6
                 marker.RenewSelectedMarker(screenX, valueY);
             }
         }
+
+        private void openGLControl_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            // MinMax 재설정 활성화
+            IsSetMinMax = true;
+
+            // Ctrl + Wheel -> Y축 Scale 변경
+            if (System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control)
+            {
+                var yScale = 5;
+                // Ref Level 값은 고정, Min Y 만 조절하도록
+                if (MaxY == MinY) return;
+
+                if (e.Delta > 0)
+                {
+                    // Zoom in
+                    MinY -= yScale;
+                }
+                else
+                {
+                    // Zoom out
+                    MinY += yScale;
+                }
+
+                if (MinY > MaxY) MaxY = MinY;
+            }
+
+            // X축 Scale 변경
+            else
+            {
+                var xScale = 10;
+                // Center 중심으로 양 쪽으로 펼쳐지도록
+                if (e.Delta > 0)
+                {
+                    // Zoom in
+                    MinX -= xScale;
+                    MaxX += xScale;
+                }
+                else
+                {
+                    // Zoom out
+                    MinX += xScale;
+                    MaxX -= xScale;
+                }
+
+                if (MinX > MaxX) MinX = MaxX = CenterFrequency; 
+            }
+        }
         #endregion
 
         // 축에 표현할 최소/최대 x, y를 Spectrum Parameter(DependencyObject)에서 설정한 값으로 변환해서 적용함
         private void SetMinMaxXY()
         {
-            this.MinX = this.CenterFrequency - this.Span / 2.0;
-            this.MaxX = this.CenterFrequency + this.Span / 2.0;
+            //this.MinX = this.CenterFrequency - this.Span / 2.0;
+            //this.MaxX = this.CenterFrequency + this.Span / 2.0;
 
-            this.MinY = this.RefLevel - this.DivScale * this.NumOfColumn;
-            this.MaxY = this.RefLevel;
+            //this.MinY = this.RefLevel - this.DivScale * this.NumOfColumn;
+            //this.MaxY = this.RefLevel;
+
+            this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+            this.Span = this.MaxX - this.MinX;
+
+            this.RefLevel = this.MaxY;
+            this.DivScale = (this.MaxY - this.MinY) / this.NumOfRow;
         }
 
         #region Marker Interface 
@@ -580,6 +641,24 @@ namespace GLGraphLib_DotNet6
         #endregion
 
         #region Trace Interface
+        /// <summary>
+        /// Create Trace
+        /// </summary>
+        /// <param name="data">double array data(max length : Trace.TotalDataLength) </param>
+        /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
+        public void MakeTrace(double[] data, int traceIndex)
+        {
+            if (!IsLoadSample)
+            {
+                trace.SetData(data, traceIndex);
+            }
+        }
+
+        /// <summary>
+        ///  Trace Show/Hide
+        /// </summary>
+        /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
+        /// <returns></returns>
         public bool ShowHideTrace(int traceIndex)
         {
             // 해당 Index에 대한 Trace data 유무 파악
@@ -597,5 +676,6 @@ namespace GLGraphLib_DotNet6
             return true;
         }
         #endregion
+
     }
 }

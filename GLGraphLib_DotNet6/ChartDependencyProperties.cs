@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows;
 
 // 해당 파일은 Dependency Object들을 정의
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     // ConstellationChart의 Dependency Object들을 정의
     public partial class ConstellationChart
@@ -31,8 +31,8 @@ namespace GLGraphLib_DotNet6
             if (this.CurrentControlHeight <= 0) this.CurrentControlWidth = 300;
             if (this.CurrentControlWidth <= 0) this.CurrentControlHeight = 300;
 
-            this.BackgroundColor = new(Color.Black);
-            this.AxisColor = new(Color.White);
+            this.BackgroundColor = new RGBcolor(Color.Black);
+            this.AxisColor = new RGBcolor(Color.White);
         }
     }
 
@@ -77,10 +77,10 @@ namespace GLGraphLib_DotNet6
         }
 
         // To Do :: Color 관련하여 Dependency Object 추가하기
-        RGBcolor spectrumColor1 = new(Color.Yellow); // trace 1
-        RGBcolor spectrumColor2 = new(Color.Pink); // trace 2
-        RGBcolor spectrumColor3 = new(Color.Purple); // trace 3
-        RGBcolor spectrumColor4 = new(Color.Violet); // trace 4
+        RGBcolor spectrumColor1 = new RGBcolor(Color.Yellow); // trace 1
+        RGBcolor spectrumColor2 = new RGBcolor(Color.Pink); // trace 2
+        RGBcolor spectrumColor3 = new RGBcolor(Color.Purple); // trace 3
+        RGBcolor spectrumColor4 = new RGBcolor(Color.Violet); // trace 4
 
         /// <summary>
         ///  x 축의 Text의 도시 여부
@@ -133,42 +133,47 @@ namespace GLGraphLib_DotNet6
 
         override public void InitProperty()
         {
-            // Min, Max X to Freq/Span
-            if (this.MinX > 0 && this.MaxX > 0)
-            {
-                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
-                this.Span = Math.Abs(this.MaxX - this.MinX);
-            }
-
-            // Set default Center Freq
-            else
-            {
-                this.CenterFrequency = 3650.01;
-                this.Span = 150.0;
-            }
-
-            // Min, Max Y to RefLv/DicScale
-            if (this.MinY > 0 && this.MaxY > 0)
-            {
-                this.RefLevel = this.MaxY;
-                this.DivScale = (this.MaxY - this.MinY) / (double)this.NumOfRow;
-            }
-
-            else
-            {
-                this.RefLevel = 0;
-                this.DivScale = 10;
-            }
-
             if (this.NumOfRow <= 0 && this.NumOfColumn <= 0) this.NumOfRow = this.NumOfColumn = 10;
             if (this.PaddingHorizontal <= 0) this.PaddingHorizontal = 40;
             if (this.PaddingVertical <= 0) this.PaddingVertical = 30;
 
             if (this.CurrentControlHeight <= 0) this.CurrentControlHeight = 300;
-            if (this.CurrentControlWidth <= 0 ) this.CurrentControlWidth = 800;
+            if (this.CurrentControlWidth <= 0) this.CurrentControlWidth = 800;
 
-            this.BackgroundColor = new(Color.Black);
-            this.AxisColor = new(Color.White);
+            // Min, Max X to Freq/Span
+            if (this.MinX == this.MaxX && this.MaxX == 0)
+            {
+                this.MinX = this.CenterFrequency - this.Span / 2.0;
+                this.MaxX = this.CenterFrequency + this.Span / 2.0;
+            }
+
+            // Set default Center Freq
+            else
+            {
+                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+                this.Span = Math.Abs(this.MaxX - this.MinX);
+            }
+
+            // DivScale Default
+            if (this.DivScale == 0) this.DivScale = 10;
+
+            // Min, Max Y to RefLv/DicScale
+            if (this.MinY == this.MaxY && this.MaxY == 0)
+            {
+                // Default Min, Max Y
+                this.MinY = this.RefLevel - this.DivScale * this.NumOfRow;
+                this.MaxY = this.RefLevel;
+            }
+
+            else
+            {
+                // Max, Min Y가 적절하게 설정되어 있을 때
+                this.RefLevel = this.MaxY;
+                this.DivScale = (this.MaxY - this.MinY) / (double)this.NumOfRow;
+            }
+
+            this.BackgroundColor = new RGBcolor(Color.Black);
+            this.AxisColor = new RGBcolor(Color.White);
 
             this.IsShowXaxisText = true;
         }
@@ -207,9 +212,9 @@ namespace GLGraphLib_DotNet6
             if (this.CurrentControlHeight <= 0) this.CurrentControlHeight = 300;
             if (this.CurrentControlWidth <= 0) this.CurrentControlWidth = 800;
 
-            if (this.BackgroundColor == null) this.BackgroundColor = new(Color.Black);
-            if (this.AxisColor == null) this.AxisColor = new(Color.White);
-            if (this.BarColor == null) this.BarColor = new(Color.Red);
+            if (this.BackgroundColor == null) this.BackgroundColor = new RGBcolor(Color.Black);
+            if (this.AxisColor == null) this.AxisColor = new RGBcolor(Color.White);
+            if (this.BarColor == null) this.BarColor = new RGBcolor(Color.Red);
         }
     }
 }

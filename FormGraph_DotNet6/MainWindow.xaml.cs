@@ -1,7 +1,6 @@
 ﻿using FormGraphLib_DotNet6;
-using GLGraphLib_DotNet6;
+using GLGraphLib;
 using System;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -20,24 +19,11 @@ namespace FormGraph_DotNet6
 
             GraphComponent.MaxWidth = 800;
             GraphComponent.MaxHeight = 400;
-        }
 
-        // Lib Path :: C:\Solutions\Test\FormGraphTest\GLGraphLib_DotNet6\bin\Debug\net6.0-windows
-
-        private void ChangeCHartButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (bToggled)
-            {
-                ConstellationChartControl.Visibility = Visibility.Hidden;
-                SpectrumChartControl.Visibility = Visibility.Visible;
-            }
-
-            else
-            {
-                ConstellationChartControl.Visibility = Visibility.Visible;
-                SpectrumChartControl.Visibility = Visibility.Hidden;
-            }
-            bToggled = !bToggled;
+            MinXTextBox.Text = (SpectrumChartControl.CenterFrequency - SpectrumChartControl.Span / 2).ToString();
+            MaxXTextBox.Text = (SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2).ToString();
+            MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
+            MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -98,6 +84,79 @@ namespace FormGraph_DotNet6
                 }
             }
             return 0;
+        }
+
+        bool isTwoState = false;
+        private void MakeSampleButton_Click(object sender, RoutedEventArgs e)
+        {
+            double[] data = new double[Trace.TotalDataLength];
+
+            isTwoState = !isTwoState;
+
+            int totalLength = Trace.TotalDataLength - 50;
+            if (isTwoState)
+            {
+                for ( int i = 0; i < totalLength; i++)
+                {
+                    data[i] = -100 + 0.1 * i;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < totalLength; i++)
+                {
+                    data[i] = -0.1 * i;
+                }
+            }
+
+            for ( int i = totalLength; i < Trace.TotalDataLength; i++)
+            {
+                if (i % 2 == 0) data[i] = 0 + 0.1 * i;
+                else data[i] = -100 - 0.1 * i;
+            }
+
+            SpectrumChartControl.MakeTrace(data, 0);
+        }
+
+        private void SetMinXYButton_Click(object sender, RoutedEventArgs e)
+        {
+            SpectrumChartControl.IsSetMinMax = true;
+            SpectrumChartControl.MinX = double.Parse(MinXTextBox.Text);
+            SpectrumChartControl.MaxX = double.Parse(MaxXTextBox.Text);
+            SpectrumChartControl.MinY = double.Parse(MinYTextBox.Text);
+            SpectrumChartControl.MaxY = double.Parse(MaxYTextBox.Text);
+        }
+
+        private void SpectrumButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button? btn = sender as Button;
+
+            if (btn != null)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    string btnContent = btn.Content.ToString();
+
+                    SpectrumChartControl.Visibility = Visibility.Hidden;
+                    BarGraphChartControl.Visibility = Visibility.Hidden;
+                    ConstellationChartControl.Visibility = Visibility.Hidden;
+
+                    if (btnContent.Contains("Spectrum"))
+                    {
+                        SpectrumChartControl.Visibility = Visibility.Visible;
+                    }
+
+                    else if (btnContent.Contains("Constellation"))
+                    {
+                        ConstellationChartControl.Visibility = Visibility.Visible;
+                    }
+
+                    else if (btnContent.Contains("Bar"))
+                    {
+                        BarGraphChartControl.Visibility = Visibility.Visible;
+                    }
+                }));
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     /// <summary>
     /// UserControl1.xaml에 대한 상호 작용 논리
@@ -14,12 +14,16 @@ namespace GLGraphLib_DotNet6
         // 반복을 체크함
         int iter = 0;
 
+        BarComponent component;
+
         public BarGraphChart()
         {
             InitializeComponent();
 
             this.InitProperty();
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
+
+            component = new BarComponent(this.NumOfColumn);
         }
 
         private void OpenGLControl_OpenGLDraw(object sender, OpenGLRoutedEventArgs args)
@@ -152,10 +156,11 @@ namespace GLGraphLib_DotNet6
             // Sample Data 정의
             Random random = new Random();
             double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
-            for ( int i = 0; i < data.Length; i++)
-            {
-                // data[i] = random.Next(-100, 0);
-            }
+            component.SetData(data);
+            //for ( int i = 0; i < data.Length; i++)
+            //{
+            //    // data[i] = random.Next(-100, 0);
+            //}
 
             // CnfOfColumn을 벗어난 데이터는 모두 버려야 함
 
@@ -167,11 +172,13 @@ namespace GLGraphLib_DotNet6
             // Draw the Bar
             for (int i = 0; i < NumOfColumn; i++)
             {
+                var value = component.GetData(i);
+
                 // Calculate the position and size of the current bar
                 var xBottom = PaddingHorizontal + sizeX * i; // x Bottom
                 var yBottom = PaddingVertical + BottomOffset; // y Bottom
                 var barWidth = sizeX * 0.725f;
-                var barHeight = sizeY * CalcUtil.CalculatePercentile(MinY, MaxY, data[i]);
+                var barHeight = sizeY * CalcUtil.CalculatePercentile(MinY, MaxY, value);
 
                 // Draw the current bar
                 gl.Begin(OpenGL.GL_QUADS);

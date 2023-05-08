@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     public static class SpectrumChartUtil
     {
@@ -27,8 +27,21 @@ namespace GLGraphLib_DotNet6
         // Data Index를 통해서 Screen Y 좌표를 구함
         public static float GetScreenY(double yValue, double minY, double maxY, double ControlHeight, double PaddingVertical)
         {
-            return (float)((yValue - minY) / (maxY - minY) * (ControlHeight - PaddingVertical * 2.0)) + (float)PaddingVertical;
-        }
+            // y value가 적정범위일 때
+            if (yValue <  minY)
+            {
+                return (float)PaddingVertical;
+            }
 
+            else if ( yValue > maxY)
+            {
+                return (float)(ControlHeight - PaddingVertical);
+            }
+
+            else
+            {
+                return (float)((yValue - minY) / (maxY - minY) * (ControlHeight - PaddingVertical * 2.0)) + (float)PaddingVertical;
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
-namespace GLGraphLib_DotNet6
+namespace GLGraphLib
 {
     public class ConstellationComponent
     {
@@ -63,5 +64,14 @@ namespace GLGraphLib_DotNet6
             return ChannelColors[channelIndex].B / division;
         }
 
+        public void SetChannelX(int channel, int constellation, double value)
+        {
+            CH_X[channel, constellation] = value;
+        }
+
+        public void SetChannelY(int channel, int constellation, double value)
+        {
+            CH_Y[channel, constellation] = value;
+        }
     }
 }
