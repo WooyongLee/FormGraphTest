@@ -9,12 +9,11 @@ namespace GLGraphLib
     {
         public static readonly int MaxTraceCount = 4;
 
-        public static readonly int TotalDataLength = 1001;
 
         // 4개의 Trace의 데이터를 표현
         private List<double>[] data;
 
-        public Trace()
+        public Trace(int totalDataLength)
         {
             data = new List<double>[MaxTraceCount];
         }
@@ -26,19 +25,19 @@ namespace GLGraphLib
         }
 
         // Set Data at Trace Index
-        public void SetData(double[] values, int index)
+        public void SetData(double[, ] values, int index, int totalDataLength)
         {
             if (data[index] == null)
             {
                 // List 초기화 및 기본값(0)으로 채우기
                 data[index] = new List<double>();
-                Enumerable.Range(0, TotalDataLength).ToList().ForEach(i => data[index].Add(0));
+                Enumerable.Range(0, totalDataLength).ToList().ForEach(i => data[index].Add(0));
             }
 
             var list = data[index];
-            for (int i = 0; i < values.Length; i++) 
+            for (int i = 0; i < totalDataLength; i++) 
             {
-                list[i] = values[i];
+                list[i] = values[index, i];
             }
         }
 
@@ -48,11 +47,11 @@ namespace GLGraphLib
             return true;
         }
 
-        public void MakeSampleData(int index)
+        public void MakeSampleData(int index, int totalDataLength)
         {
             // Generate Sample Data
             Random random = new Random();
-            int MaxSample = Trace.TotalDataLength;
+            int MaxSample = totalDataLength;
 
             var dataAtIndex = data[index];
             

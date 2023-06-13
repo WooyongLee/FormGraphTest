@@ -19,7 +19,10 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
-            component = new ConstellationComponent();
+            CH_X = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
+            CH_Y = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
+
+            component = new ConstellationComponent(CH_X,CH_Y);
             
             this.SizeChanged += ConstellationChart_SizeChanged;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
@@ -172,8 +175,8 @@ namespace GLGraphLib
             Random random = new Random();
             Random random2 = new Random();
 
-            component.SetChannelX(0, 0, 0.0);
-            component.SetChannelY(0, 0, 0.0);
+            component.SetChannelValue(CH_X, 0, 0, 0.0);
+            component.SetChannelValue(CH_Y, 0, 0, 0.0);
 
             // 4 Channel Test
             for ( int i = 0; i < 4; i++)
@@ -190,8 +193,8 @@ namespace GLGraphLib
 
                     if (randomValue == 0 || randomValue2 == 0) continue;
 
-                    component.SetChannelX(i, j, randomValue - randomValue2 * randomOffsetX);
-                    component.SetChannelY(i, j, randomValue2 - randomValue * randomOffsetY);
+                    component.SetChannelValue(CH_X, i, j, randomValue - randomValue2 * randomOffsetX);
+                    component.SetChannelValue(CH_Y, i, j, randomValue2 - randomValue * randomOffsetY);
                 }
             }
         }
@@ -209,16 +212,16 @@ namespace GLGraphLib
             {
                 for ( int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
                 {
-                    if (component.CH_X[i, j] != ConstellationComponent.NullValue && component.CH_Y[i, j] != ConstellationComponent.NullValue)
+                    if (CH_X[i, j] != ConstellationComponent.NullValue && CH_Y[i, j] != ConstellationComponent.NullValue)
                     {
-                        float x = (float)((component.CH_X[i, j] - MinX) / (MaxX- MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
-                        float y = (float)((component.CH_Y[i, j] -MinY) / (MaxY - MinY) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;
+                        float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
+                        float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;
 
                         // Min/Max Ã³¸®
-                        if (component.CH_X[i, j] < MinX) x = PaddingHorizontal;
-                        if (component.CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
-                        if (component.CH_Y[i, j] < MinY) y = PaddingVertical;
-                        if (component.CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - PaddingVertical;
+                        if (CH_X[i, j] < MinX) x = PaddingHorizontal;
+                        if (CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
+                        if (CH_Y[i, j] < MinY) y = PaddingVertical;
+                        if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - PaddingVertical;
 
                         // gl.Color(1.0f, 1.0f, 0.0f); // yellow
                         gl.Color(component.GetNormalizedR(i), component.GetNormalizedG(i), component.GetNormalizedB(i));

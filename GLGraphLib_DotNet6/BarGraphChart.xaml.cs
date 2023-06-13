@@ -20,6 +20,9 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
+            // Column 개수만큼 생성
+            this.BarData = new double[NumOfColumn];
+
             this.InitProperty();
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
 
@@ -155,8 +158,17 @@ namespace GLGraphLib
         {
             // Sample Data 정의
             Random random = new Random();
-            double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
-            component.SetData(data);
+
+            if (IsLoadSample)
+            {
+                double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
+                component.SetData(data);
+            }
+
+            else
+            {
+                component.SetData(this.BarData);
+            }
             //for ( int i = 0; i < data.Length; i++)
             //{
             //    // data[i] = random.Next(-100, 0);

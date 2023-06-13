@@ -24,6 +24,8 @@ namespace FormGraph_DotNet6
             MaxXTextBox.Text = (SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2).ToString();
             MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
             MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
+
+            // this.BarGraphChartControl.BarData = new double[] { -90, -80, -70, -60, -50.0, -40, -30.0, -20, -10 };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -89,33 +91,58 @@ namespace FormGraph_DotNet6
         bool isTwoState = false;
         private void MakeSampleButton_Click(object sender, RoutedEventArgs e)
         {
-            double[] data = new double[Trace.TotalDataLength];
-
             isTwoState = !isTwoState;
+           
+            //double[] data = new double[SpectrumChartControl.TotalDataLength];
 
-            int totalLength = Trace.TotalDataLength - 50;
+            //int totalLength = SpectrumChartControl.TotalDataLength - 50;
+            //if (isTwoState)
+            //{
+            //    for ( int i = 0; i < totalLength; i++)
+            //    {
+            //        data[i] = -100 + 0.1 * i;
+            //    }
+            //}
+            //else
+            //{
+            //    for (int i = 0; i < totalLength; i++)
+            //    {
+            //        data[i] = -0.1 * i;
+            //    }
+            //}
+
+            //for ( int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
+            //{
+            //    if (i % 2 == 0) data[i] = 0 + 0.1 * i;
+            //    else data[i] = -100 - 0.1 * i;
+            //}
+
+            var data = SpectrumChartControl.SpectrumData;
+
+
+            int totalLength = SpectrumChartControl.TotalDataLength - 50;
             if (isTwoState)
             {
-                for ( int i = 0; i < totalLength; i++)
+                for (int i = 0; i < totalLength; i++)
                 {
-                    data[i] = -100 + 0.1 * i;
+                    data[0, i] = -100 + 0.1 * i;
                 }
             }
             else
             {
                 for (int i = 0; i < totalLength; i++)
                 {
-                    data[i] = -0.1 * i;
+                    data[0, i] = -0.1 * i;
                 }
             }
 
-            for ( int i = totalLength; i < Trace.TotalDataLength; i++)
+            for (int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
             {
-                if (i % 2 == 0) data[i] = 0 + 0.1 * i;
-                else data[i] = -100 - 0.1 * i;
+                if (i % 2 == 0) data[0, i] = 0 + 0.1 * i;
+                else data[0, i] = -100 - 0.1 * i;
             }
 
-            SpectrumChartControl.MakeTrace(data, 0);
+            SpectrumChartControl.MakeTrace(0);
         }
 
         private void SetMinXYButton_Click(object sender, RoutedEventArgs e)

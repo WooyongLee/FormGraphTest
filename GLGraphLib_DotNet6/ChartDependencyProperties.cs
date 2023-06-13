@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Media.Animation;
 
 // 해당 파일은 Dependency Object들을 정의
 namespace GLGraphLib
@@ -9,11 +10,38 @@ namespace GLGraphLib
     public partial class ConstellationChart
     {
         #region Properties
+        /// <summary>
+        /// x 좌표 값
+        /// </summary>
+        public double[,] CH_X
+        {
+            get { return (double[,])GetValue(CH_X_Property); }
+            set { SetValue(CH_X_Property, value); }
+        }
 
+        /// <summary>
+        /// y 좌표 값
+        /// </summary>
+        public double[,] CH_Y
+        {
+            get { return (double[,])GetValue(CH_Y_Property); }
+            set { SetValue(CH_Y_Property, value); }
+        }
         #endregion
 
         #region Define DependencyProperty from Properties
-
+        public static readonly DependencyProperty CH_X_Property = DependencyProperty.Register(
+            "CH_X",
+            typeof(double[,]),
+            typeof(ConstellationChart),
+            null
+    );
+        public static readonly DependencyProperty CH_Y_Property = DependencyProperty.Register(
+            "CH_Y",
+            typeof(double[,]),
+            typeof(ConstellationChart),
+            null
+    );
         #endregion
 
         override public void InitProperty()
@@ -40,6 +68,20 @@ namespace GLGraphLib
     public partial class SpectrumChart
     {
         #region Properties
+
+        public double[, ] SpectrumData
+        {
+            get { return (double[, ])GetValue(SpectrumDataProperty); }
+            set { SetValue(SpectrumDataProperty, value); }
+        }
+
+        public int TotalDataLength
+        {
+            get { return (int)GetValue(TotalDataLengthProperty); }
+            set { SetValue(TotalDataLengthProperty, value); }
+        }
+
+
         /// <summary>
         /// X : Center Frequency (Center X Value)
         /// </summary>
@@ -94,6 +136,20 @@ namespace GLGraphLib
         #endregion
 
         #region Define DependencyProperty from Properties
+        public static readonly DependencyProperty SpectrumDataProperty = DependencyProperty.Register(
+            "SpectrumData",
+            typeof(double[, ]),
+            typeof(SpectrumChart),
+            null
+            );
+
+         public static readonly DependencyProperty TotalDataLengthProperty = DependencyProperty.Register(
+            "TotalDataLength",
+            typeof(int),
+            typeof(SpectrumChart),
+            null
+            );
+
         public static readonly DependencyProperty CenterFrequencyProperty = DependencyProperty.Register(
             "CenterFrequency",
             typeof(double),
@@ -182,6 +238,12 @@ namespace GLGraphLib
     public partial class BarGraphChart
     {
         #region Properties
+        public double[] BarData
+        {
+            get { return (double[])GetValue(BarDataProperty); }
+            set { SetValue(BarDataProperty, value); }
+        }
+
         /// <summary>
         /// X : Center Frequency (Center X Value)
         /// </summary>
@@ -193,6 +255,13 @@ namespace GLGraphLib
         #endregion
 
         #region Define DependencyProperty from Properties
+        public static readonly DependencyProperty BarDataProperty = DependencyProperty.Register(
+            "BarData",
+            typeof(double[]),
+            typeof(BarGraphChart),
+            null
+        );
+
         public static readonly DependencyProperty BarColorProperty = DependencyProperty.Register(
             "BarColor",
             typeof(RGBcolor),

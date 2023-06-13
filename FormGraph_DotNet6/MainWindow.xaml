@@ -71,8 +71,8 @@
                 </StackPanel>
             </Grid>
             <Grid Panel.ZIndex="2">
-                <glgraph:BarGraphChart x:Name="BarGraphChartControl" Visibility="Hidden"
-                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="True"
+                <glgraph:BarGraphChart x:Name="BarGraphChartControl" Visibility="Hidden" 
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
                                        MaxY="0" MinY="-100" MaxX="7" MinX="0">
                 </glgraph:BarGraphChart>
                 
@@ -81,10 +81,10 @@
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" > 
                 </glgraph:ConstellationChart>
 
-                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible"
+                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="1001"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
                                        CenterFrequency="3650.01" Span="150"
-                                       RefLevel="-20" DivScale="10" >
+                                       RefLevel="-20" DivScale="10" >       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>

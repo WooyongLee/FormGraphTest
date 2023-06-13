@@ -57,10 +57,14 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
-            screenPositions = new ScreenPositions(Trace.TotalDataLength);
+            // 기본 Total Length 설정
+            TotalDataLength = 1001;
+            screenPositions = new ScreenPositions(TotalDataLength);
+
+            SpectrumData = new double[Trace.MaxTraceCount, TotalDataLength];
 
             marker = new Marker();
-            trace = new Trace();
+            trace = new Trace(TotalDataLength);
 
             specCheckTimer = new Timer(TimerCallBack);
             specCheckTimer.Change(4999, 999); // 1초 1회
@@ -77,7 +81,7 @@ namespace GLGraphLib
 
         private void TimerCallBack(object? state)
         {
-            Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
+            // Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
             prevIter = iter;
         }
 
@@ -363,7 +367,7 @@ namespace GLGraphLib
                 {
                     if (IsLoadSample)
                     {
-                        trace.MakeSampleData(traceIndex);
+                        trace.MakeSampleData(traceIndex, TotalDataLength);
                     }
 
                     #region Use Line Strip
@@ -372,9 +376,9 @@ namespace GLGraphLib
                     // Draw Line from points
                     gl.Begin(OpenGL.GL_LINE_STRIP);
                     gl.Color(spectrumColor.R, spectrumColor.G, spectrumColor.B);
-                    for (int i = 0; i < Trace.TotalDataLength; i++)
+                    for (int i = 0; i < TotalDataLength; i++)
                     {
-                        float currentX = SpectrumChartUtil.GetScreenX(i, Trace.TotalDataLength, CurrentControlWidth, PaddingHorizontal);
+                        float currentX = SpectrumChartUtil.GetScreenX(i, TotalDataLength, CurrentControlWidth, PaddingHorizontal);
                         float currentY = SpectrumChartUtil.GetScreenY(traceData[i], MinY, MaxY, CurrentControlHeight, PaddingVertical);
 
                         screenPositions.Set(currentX, currentY, i);
@@ -615,7 +619,7 @@ namespace GLGraphLib
             else
             {
                 // Center Frequency를 기본 Point로 추가
-                var DataLength = Trace.TotalDataLength;
+                var DataLength = TotalDataLength;
 
                 var screenX = SpectrumChartUtil.GetScreenX(DataLength / 2 + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
                 var valueY = screenPositions.GetClosestData(screenX, ref screenX);
@@ -646,11 +650,11 @@ namespace GLGraphLib
         /// </summary>
         /// <param name="data">double array data(max length : Trace.TotalDataLength) </param>
         /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
-        public void MakeTrace(double[] data, int traceIndex)
+        public void MakeTrace(int traceIndex)
         {
             if (!IsLoadSample)
             {
-                trace.SetData(data, traceIndex);
+                trace.SetData(SpectrumData, traceIndex, TotalDataLength);
             }
         }
 
@@ -670,7 +674,7 @@ namespace GLGraphLib
 
             else
             {
-                trace.SetData(new double[1001], traceIndex);
+                trace.SetData(new double[Trace.MaxTraceCount ,TotalDataLength], traceIndex, TotalDataLength);
             }
 
             return true;
