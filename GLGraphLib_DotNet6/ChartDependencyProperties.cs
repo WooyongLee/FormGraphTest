@@ -27,6 +27,13 @@ namespace GLGraphLib
             get { return (double[,])GetValue(CH_Y_Property); }
             set { SetValue(CH_Y_Property, value); }
         }
+
+        //public double[,,] ConstellationData
+        //{
+        //    get { return (double[,,])GetValue(ConstellationDataProperty); }
+        //    set { SetValue(ConstellationDataProperty, value); }
+        //}
+
         #endregion
 
         #region Define DependencyProperty from Properties
@@ -35,13 +42,20 @@ namespace GLGraphLib
             typeof(double[,]),
             typeof(ConstellationChart),
             null
-    );
+        );
         public static readonly DependencyProperty CH_Y_Property = DependencyProperty.Register(
             "CH_Y",
             typeof(double[,]),
             typeof(ConstellationChart),
             null
-    );
+        );
+
+        //public static readonly DependencyProperty ConstellationDataProperty = DependencyProperty.Register(
+        //    "ConstellationData",
+        //    typeof(double[,,]),
+        //    typeof(ConstellationChart),
+        //    null
+        //);
         #endregion
 
         override public void InitProperty()

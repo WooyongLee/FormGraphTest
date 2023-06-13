@@ -25,7 +25,7 @@ namespace FormGraph_DotNet6
             MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
             MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
 
-            // this.BarGraphChartControl.BarData = new double[] { -90, -80, -70, -60, -50.0, -40, -30.0, -20, -10 };
+            this.BarGraphChartControl.BarData = new double[] { -90, -80, -70, -60, -50.0, -40, -30.0, -20, -10 };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

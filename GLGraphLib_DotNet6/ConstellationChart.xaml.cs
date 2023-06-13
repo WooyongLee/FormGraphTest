@@ -21,7 +21,6 @@ namespace GLGraphLib
 
             CH_X = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
             CH_Y = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
-
             component = new ConstellationComponent(CH_X,CH_Y);
             
             this.SizeChanged += ConstellationChart_SizeChanged;

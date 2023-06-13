@@ -19,7 +19,7 @@ namespace GLGraphLib
         public void SetData(double[] data)
         {
             // param data의 length가 다르다면 새로 생성
-            if ( this.data.Length != data.Length)
+            if (data.Length > 0 && this.data.Length != data.Length)
             {
                 this.data = new double[data.Length];
             }
