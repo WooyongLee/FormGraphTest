@@ -77,11 +77,18 @@ namespace GLGraphLib
 
             // Dependency Property Set Owner
             IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
+
+            InitProperty();
+
+            for (int i = 0; i < Trace.MaxTraceCount; i++)
+            {
+                trace.SetData(SpectrumData, i, TotalDataLength);
+            }
         }
 
         private void TimerCallBack(object? state)
         {
-            // Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
+            Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
             prevIter = iter;
         }
 
@@ -105,7 +112,7 @@ namespace GLGraphLib
             // 초기 값 적용
             if (iter == 0)
             {
-                InitProperty();
+                 // InitProperty();
             }
 
             // Min, Max 값 적용
@@ -226,6 +233,9 @@ namespace GLGraphLib
                 screenX = ScreenMaxX - xAxisXoffset * 2;
 
                 GLUtil.DrawFormattedText(gl, valueX, (int)screenX, (int)ScreenMinY, AxisColor, 5, fontsizeX);
+
+                // 단위 도시 (x)
+                gl.DrawText((int)ScreenMaxX + xAxisXoffset * 3, (int)ScreenMinY, spectrumColor1.R, spectrumColor1.G, spectrumColor1.B, GLUtil.FONT, fontsizeX, "(MHz)");
             } // end if (IsShowXaxisText)
 
             // Column
@@ -237,9 +247,6 @@ namespace GLGraphLib
 
                 GLUtil.DrawFormattedText(gl, valueY, (int)ScreenMinX, (int)screenY, AxisColor, 2, fontsize);
             }
-
-            // 단위 도시 (x)
-            gl.DrawText((int)ScreenMaxX + xAxisXoffset * 3, (int)ScreenMinY, spectrumColor1.R, spectrumColor1.G, spectrumColor1.B, GLUtil.FONT, fontsizeX, "(MHz)");
 
             // 단위 도시 (y)
             gl.DrawText((int)ScreenMinX, (int)ScreenMaxY + yAxisYOffset * 3, spectrumColor1.R, spectrumColor1.G, spectrumColor1.B, GLUtil.FONT, fontsize, "(dBm)");
@@ -360,6 +367,14 @@ namespace GLGraphLib
         {
             for (int traceIndex = 0; traceIndex < Trace.MaxTraceCount; traceIndex++)
             {
+                // Spectrum Visible 할 때만 가능
+                if (!IsVisibleSpectrum[traceIndex])
+                {
+                    continue;
+                }
+
+                this.MakeTrace(traceIndex);
+
                 // 해당 Index에 대한 Trace 데이터
                 var traceData = trace.GetData(traceIndex);
 
@@ -547,46 +562,46 @@ namespace GLGraphLib
             IsSetMinMax = true;
 
             // Ctrl + Wheel -> Y축 Scale 변경
-            if (System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control)
-            {
-                var yScale = 5;
-                // Ref Level 값은 고정, Min Y 만 조절하도록
-                if (MaxY == MinY) return;
+            //if (System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control)
+            //{
+            //    var yScale = 5;
+            //    // Ref Level 값은 고정, Min Y 만 조절하도록
+            //    if (MaxY == MinY) return;
 
-                if (e.Delta > 0)
-                {
-                    // Zoom in
-                    MinY -= yScale;
-                }
-                else
-                {
-                    // Zoom out
-                    MinY += yScale;
-                }
+            //    if (e.Delta > 0)
+            //    {
+            //        // Zoom in
+            //        MinY -= yScale;
+            //    }
+            //    else
+            //    {
+            //        // Zoom out
+            //        MinY += yScale;
+            //    }
 
-                if (MinY > MaxY) MaxY = MinY;
-            }
+            //    if (MinY > MaxY) MaxY = MinY;
+            //}
 
-            // X축 Scale 변경
-            else
-            {
-                var xScale = 10;
-                // Center 중심으로 양 쪽으로 펼쳐지도록
-                if (e.Delta > 0)
-                {
-                    // Zoom in
-                    MinX -= xScale;
-                    MaxX += xScale;
-                }
-                else
-                {
-                    // Zoom out
-                    MinX += xScale;
-                    MaxX -= xScale;
-                }
+            //// X축 Scale 변경
+            //else
+            //{
+            //    var xScale = 10;
+            //    // Center 중심으로 양 쪽으로 펼쳐지도록
+            //    if (e.Delta > 0)
+            //    {
+            //        // Zoom in
+            //        MinX -= xScale;
+            //        MaxX += xScale;
+            //    }
+            //    else
+            //    {
+            //        // Zoom out
+            //        MinX += xScale;
+            //        MaxX -= xScale;
+            //    }
 
-                if (MinX > MaxX) MinX = MaxX = CenterFrequency; 
-            }
+            //    if (MinX > MaxX) MinX = MaxX = CenterFrequency; 
+            //}
         }
         #endregion
 

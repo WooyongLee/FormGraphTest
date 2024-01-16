@@ -82,11 +82,45 @@ namespace GLGraphLib
     public partial class SpectrumChart
     {
         #region Properties
-
         public double[, ] SpectrumData
         {
             get { return (double[, ])GetValue(SpectrumDataProperty); }
-            set { SetValue(SpectrumDataProperty, value); }
+            set {
+                // Data 변경을 확인한 후, 
+                bool IsSpectrumDataChanged(double[,] newValue)
+                {
+                    if (this.SpectrumData == null && newValue == null)
+                        return false;
+
+                    if (this.SpectrumData == null || newValue == null)
+                        return true;
+
+                    if (this.SpectrumData.GetLength(0) != newValue.GetLength(0) || this.SpectrumData.GetLength(1) != newValue.GetLength(1))
+                        return true;
+
+                    for (int i = 0; i < this.SpectrumData.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < this.SpectrumData.GetLength(1); j++)
+                        {
+                            // 둘 중 하나라도 같은게 있으면 변경
+                            if (this.SpectrumData[i, j] != newValue[i, j])
+                                return true;
+                        }
+                    }
+                    return false;
+                }
+
+                if ( IsSpectrumDataChanged(value))
+                {
+                    SetValue(SpectrumDataProperty, value);
+                }
+            }
+        }
+
+        public bool[] IsVisibleSpectrum
+        {
+            get { return (bool[])GetValue(IsVisibleSpectrumProperty); }
+            set { SetValue(IsVisibleSpectrumProperty, value); }
         }
 
         public int TotalDataLength
@@ -94,7 +128,6 @@ namespace GLGraphLib
             get { return (int)GetValue(TotalDataLengthProperty); }
             set { SetValue(TotalDataLengthProperty, value); }
         }
-
 
         /// <summary>
         /// X : Center Frequency (Center X Value)
@@ -146,7 +179,6 @@ namespace GLGraphLib
             get { return (bool)GetValue(IsShowXaxisTextProperty); }
             set { SetValue(IsShowXaxisTextProperty, value); }
         }
-
         #endregion
 
         #region Define DependencyProperty from Properties
@@ -157,7 +189,14 @@ namespace GLGraphLib
             null
             );
 
-         public static readonly DependencyProperty TotalDataLengthProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty IsVisibleSpectrumProperty = DependencyProperty.Register(
+            "IsVisibleSpectrum",
+            typeof(bool[]),
+            typeof(SpectrumChart),
+            null
+            );
+
+        public static readonly DependencyProperty TotalDataLengthProperty = DependencyProperty.Register(
             "TotalDataLength",
             typeof(int),
             typeof(SpectrumChart),
@@ -198,7 +237,6 @@ namespace GLGraphLib
             typeof(SpectrumChart),
             null
             );
-
         #endregion
 
         override public void InitProperty()
@@ -246,6 +284,12 @@ namespace GLGraphLib
             this.AxisColor = new RGBcolor(Color.White);
 
             this.IsShowXaxisText = true;
+            this.TotalDataLength = 1001;
+
+            IsVisibleSpectrum = new bool[Trace.MaxTraceCount];
+            SpectrumData = new double[Trace.MaxTraceCount, this.TotalDataLength];
+
+            IsVisibleSpectrum[0] = true; // 첫 trace는 Visible
         }
     }
 

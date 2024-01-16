@@ -10,7 +10,7 @@ namespace GLGraphLib
         /// <summary>
         /// 총 Channel 개수
         /// </summary>
-        public static int MaxChannel = 14;
+        public static int MaxChannel = 12;
 
         /// <summary>
         /// 채널 당 최대 Constellation 표현 개수

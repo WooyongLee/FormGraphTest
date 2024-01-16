@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace GLGraphLib
 {
@@ -9,22 +10,22 @@ namespace GLGraphLib
         /// <summary>
         /// 총 Channel 개수
         /// </summary>
-        public static int MaxChannel = 14;
+        public static int MaxChannel = 12;
 
         /// <summary>
         /// 채널 당 최대 Constellation 표현 개수
         /// </summary>
         public static int MaxConstellationData = 1024;
 
-        /// <summary>
-        /// x 좌표 값
-        /// </summary>
-        public double[,] CH_X = new double[MaxChannel, MaxConstellationData];
+        ///// <summary>
+        ///// x 좌표 값
+        ///// </summary>
+        //public double[,] CH_X = new double[MaxChannel, MaxConstellationData];
 
-        /// <summary>
-        /// y 좌표 값
-        /// </summary>
-        public double[,] CH_Y = new double[MaxChannel, MaxConstellationData];
+        ///// <summary>
+        ///// y 좌표 값
+        ///// </summary>
+        //public double[,] CH_Y = new double[MaxChannel, MaxConstellationData];
 
         /// <summary>
         /// 각 Channel 표현할 색상
@@ -34,7 +35,7 @@ namespace GLGraphLib
             Color.FromArgb(255,129,199,132), Color.FromArgb(255,192,202,51), Color.FromArgb(255,244,67,54), Color.FromArgb(255,46,134,193),
             Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193), Color.Red};
 
-        public ConstellationComponent()
+        public ConstellationComponent(double[,] CH_X, double[,] CH_Y)
         {
             // Constellation Data에 기본값 세팅
             for ( int i = 0; i < MaxChannel; i++)
@@ -63,5 +64,14 @@ namespace GLGraphLib
             return ChannelColors[channelIndex].B / division;
         }
 
+        public void SetChannelValue(double[,] CH_Value, int channel, int constellation, double value)
+        {
+            CH_Value[channel, constellation] = value;
+        }
+
+        //public void SetChannelY(int channel, int constellation, double value)
+        //{
+        //    CH_Y[channel, constellation] = value;
+        //}
     }
 }

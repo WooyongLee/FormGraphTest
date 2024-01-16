@@ -1,5 +1,5 @@
 using System;
-using GLGraphLib;
+using System.ComponentModel;
 using SharpGL;
 using SharpGL.WPF;
 
@@ -19,7 +19,9 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
-            component = new ConstellationComponent();
+            CH_X = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
+            CH_Y = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
+            component = new ConstellationComponent(CH_X,CH_Y);
             
             this.SizeChanged += ConstellationChart_SizeChanged;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
@@ -172,8 +174,8 @@ namespace GLGraphLib
             Random random = new Random();
             Random random2 = new Random();
 
-            component.CH_X[0, 0] = 0.0;
-            component.CH_Y[0, 0] = 0.0;
+            component.SetChannelValue(CH_X, 0, 0, 0.0);
+            component.SetChannelValue(CH_Y, 0, 0, 0.0);
 
             // 4 Channel Test
             for ( int i = 0; i < 4; i++)
@@ -190,8 +192,8 @@ namespace GLGraphLib
 
                     if (randomValue == 0 || randomValue2 == 0) continue;
 
-                    component.CH_X[i, j] = randomValue - randomValue2 * randomOffsetX;
-                    component.CH_Y[i, j] = randomValue2 - randomValue * randomOffsetY;
+                    component.SetChannelValue(CH_X, i, j, randomValue - randomValue2 * randomOffsetX);
+                    component.SetChannelValue(CH_Y, i, j, randomValue2 - randomValue * randomOffsetY);
                 }
             }
         }
@@ -205,14 +207,33 @@ namespace GLGraphLib
                 MakeDataForTest();
             }
 
+            var xLength = CH_X.Length;
+            var yLength = CH_Y.Length;
             for ( int i = 0; i < ConstellationComponent.MaxChannel; i++)
             {
                 for ( int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
                 {
-                    if (component.CH_X[i, j] != ConstellationComponent.NullValue && component.CH_Y[i, j] != ConstellationComponent.NullValue)
+                    // 설정한 Index 범위를 벗어날 때
+                    if (i >= CH_X.GetLength(0) || j >= CH_X.GetLength(1))
                     {
-                        float x = (float)(((component.CH_X[i, j] - MinX) / (MaxX- MinX)) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
-                        float y = (float)(((component.CH_Y[i, j] -MinY) / (MaxY - MinY)) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;
+                        break;
+                    }
+
+                    if (i >= CH_Y.GetLength(0) || j >= CH_Y.GetLength(1))
+                    {
+                        break;
+                    }
+
+                    if ( CH_X[i, j] != 0 && CH_Y[i, j] != 0)
+                    {
+                        float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
+                        float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;
+
+                        // Min/Max 처리
+                        if (CH_X[i, j] < MinX) x = PaddingHorizontal;
+                        if (CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
+                        if (CH_Y[i, j] < MinY) y = PaddingVertical;
+                        if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - PaddingVertical;
 
                         // gl.Color(1.0f, 1.0f, 0.0f); // yellow
                         gl.Color(component.GetNormalizedR(i), component.GetNormalizedG(i), component.GetNormalizedB(i));

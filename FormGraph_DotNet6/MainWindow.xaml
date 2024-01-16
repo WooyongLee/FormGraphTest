@@ -77,13 +77,14 @@
                 </glgraph:BarGraphChart>
                 
                 <glgraph:ConstellationChart x:Name="ConstellationChartControl"  Visibility="Hidden"
-                                            Width="300" Height="300" HorizontalAlignment="Left" IsLoadSample="True" 
+                                            Width="300" Height="300" HorizontalAlignment="Left" IsLoadSample="False" 
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" > 
                 </glgraph:ConstellationChart>
 
                 <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="1001"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
                                        CenterFrequency="3650.01" Span="150"
+                                       IsShowXaxisText="True"
                                        RefLevel="-20" DivScale="10" >       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >

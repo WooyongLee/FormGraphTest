@@ -142,7 +142,15 @@ namespace FormGraph_DotNet6
                 else data[0, i] = -100 - 0.1 * i;
             }
 
-            SpectrumChartControl.MakeTrace(0);
+            SpectrumChartControl.IsVisibleSpectrum[0] = true;
+            // SpectrumChartControl.MakeTrace(0);
+
+            ConstellationChartControl.CH_X = new double[1, 8];
+            ConstellationChartControl.CH_Y = new double[1, 8];
+
+            ConstellationChartControl.CH_X[0, 0] = 0.1;
+            ConstellationChartControl.CH_Y[0, 0] = 0.1;
+
         }
 
         private void SetMinXYButton_Click(object sender, RoutedEventArgs e)

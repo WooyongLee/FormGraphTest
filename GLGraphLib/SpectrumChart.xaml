@@ -11,6 +11,7 @@
         <SharpGL:OpenGLControl x:Name="openGLControl"
                                MouseDown="openGLControl_MouseDown"
                                MouseMove="openGLControl_MouseMove"
-                               MouseUp="openGLControl_MouseUp"></SharpGL:OpenGLControl>
+                               MouseUp="openGLControl_MouseUp"
+                               MouseWheel="openGLControl_MouseWheel"></SharpGL:OpenGLControl>
     </Grid>
 </local:ChartUserControlBase>

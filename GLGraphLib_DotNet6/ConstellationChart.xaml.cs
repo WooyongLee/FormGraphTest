@@ -207,11 +207,24 @@ namespace GLGraphLib
                 MakeDataForTest();
             }
 
+            var xLength = CH_X.Length;
+            var yLength = CH_Y.Length;
             for ( int i = 0; i < ConstellationComponent.MaxChannel; i++)
             {
                 for ( int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
                 {
-                    if (CH_X[i, j] != ConstellationComponent.NullValue && CH_Y[i, j] != ConstellationComponent.NullValue)
+                    // 설정한 Index 범위를 벗어날 때
+                    if (i >= CH_X.GetLength(0) || j >= CH_X.GetLength(1))
+                    {
+                        break;
+                    }
+
+                    if (i >= CH_Y.GetLength(0) || j >= CH_Y.GetLength(1))
+                    {
+                        break;
+                    }
+
+                    if ( CH_X[i, j] != 0 && CH_Y[i, j] != 0)
                     {
                         float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
                         float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;

@@ -70,6 +70,7 @@
     <Compile Include="ConstellationChart.xaml.cs">
       <DependentUpon>ConstellationChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Data\BarComponent.cs" />
     <Compile Include="Data\ConstellationComponent.cs" />
     <Compile Include="Data\IndexPair.cs" />
     <Compile Include="Data\Marker.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Media.Animation;
 
 // 해당 파일은 Dependency Object들을 정의
 namespace GLGraphLib
@@ -9,11 +10,52 @@ namespace GLGraphLib
     public partial class ConstellationChart
     {
         #region Properties
+        /// <summary>
+        /// x 좌표 값
+        /// </summary>
+        public double[,] CH_X
+        {
+            get { return (double[,])GetValue(CH_X_Property); }
+            set { SetValue(CH_X_Property, value); }
+        }
+
+        /// <summary>
+        /// y 좌표 값
+        /// </summary>
+        public double[,] CH_Y
+        {
+            get { return (double[,])GetValue(CH_Y_Property); }
+            set { SetValue(CH_Y_Property, value); }
+        }
+
+        //public double[,,] ConstellationData
+        //{
+        //    get { return (double[,,])GetValue(ConstellationDataProperty); }
+        //    set { SetValue(ConstellationDataProperty, value); }
+        //}
 
         #endregion
 
         #region Define DependencyProperty from Properties
+        public static readonly DependencyProperty CH_X_Property = DependencyProperty.Register(
+            "CH_X",
+            typeof(double[,]),
+            typeof(ConstellationChart),
+            null
+        );
+        public static readonly DependencyProperty CH_Y_Property = DependencyProperty.Register(
+            "CH_Y",
+            typeof(double[,]),
+            typeof(ConstellationChart),
+            null
+        );
 
+        //public static readonly DependencyProperty ConstellationDataProperty = DependencyProperty.Register(
+        //    "ConstellationData",
+        //    typeof(double[,,]),
+        //    typeof(ConstellationChart),
+        //    null
+        //);
         #endregion
 
         override public void InitProperty()
@@ -40,6 +82,53 @@ namespace GLGraphLib
     public partial class SpectrumChart
     {
         #region Properties
+        public double[, ] SpectrumData
+        {
+            get { return (double[, ])GetValue(SpectrumDataProperty); }
+            set {
+                // Data 변경을 확인한 후, 
+                bool IsSpectrumDataChanged(double[,] newValue)
+                {
+                    if (this.SpectrumData == null && newValue == null)
+                        return false;
+
+                    if (this.SpectrumData == null || newValue == null)
+                        return true;
+
+                    if (this.SpectrumData.GetLength(0) != newValue.GetLength(0) || this.SpectrumData.GetLength(1) != newValue.GetLength(1))
+                        return true;
+
+                    for (int i = 0; i < this.SpectrumData.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < this.SpectrumData.GetLength(1); j++)
+                        {
+                            // 둘 중 하나라도 같은게 있으면 변경
+                            if (this.SpectrumData[i, j] != newValue[i, j])
+                                return true;
+                        }
+                    }
+                    return false;
+                }
+
+                if ( IsSpectrumDataChanged(value))
+                {
+                    SetValue(SpectrumDataProperty, value);
+                }
+            }
+        }
+
+        public bool[] IsVisibleSpectrum
+        {
+            get { return (bool[])GetValue(IsVisibleSpectrumProperty); }
+            set { SetValue(IsVisibleSpectrumProperty, value); }
+        }
+
+        public int TotalDataLength
+        {
+            get { return (int)GetValue(TotalDataLengthProperty); }
+            set { SetValue(TotalDataLengthProperty, value); }
+        }
+
         /// <summary>
         /// X : Center Frequency (Center X Value)
         /// </summary>
@@ -94,6 +183,27 @@ namespace GLGraphLib
         #endregion
 
         #region Define DependencyProperty from Properties
+        public static readonly DependencyProperty SpectrumDataProperty = DependencyProperty.Register(
+            "SpectrumData",
+            typeof(double[, ]),
+            typeof(SpectrumChart),
+            null
+            );
+
+        public static readonly DependencyProperty IsVisibleSpectrumProperty = DependencyProperty.Register(
+            "IsVisibleSpectrum",
+            typeof(bool[]),
+            typeof(SpectrumChart),
+            null
+            );
+
+        public static readonly DependencyProperty TotalDataLengthProperty = DependencyProperty.Register(
+            "TotalDataLength",
+            typeof(int),
+            typeof(SpectrumChart),
+            null
+            );
+
         public static readonly DependencyProperty CenterFrequencyProperty = DependencyProperty.Register(
             "CenterFrequency",
             typeof(double),
@@ -133,31 +243,42 @@ namespace GLGraphLib
 
         override public void InitProperty()
         {
+            if (this.NumOfRow <= 0 && this.NumOfColumn <= 0) this.NumOfRow = this.NumOfColumn = 10;
+            if (this.PaddingHorizontal <= 0) this.PaddingHorizontal = 40;
+            if (this.PaddingVertical <= 0) this.PaddingVertical = 30;
+
+            if (this.CurrentControlHeight <= 0) this.CurrentControlHeight = 300;
+            if (this.CurrentControlWidth <= 0) this.CurrentControlWidth = 800;
+
             // Min, Max X to Freq/Span
-            if (this.MinX > 0 && this.MaxX > 0)
+            if (this.MinX == this.MaxX && this.MaxX == 0)
             {
-                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
-                this.Span = Math.Abs(this.MaxX - this.MinX);
+                this.MinX = this.CenterFrequency - this.Span / 2.0;
+                this.MaxX = this.CenterFrequency + this.Span / 2.0;
             }
 
             // Set default Center Freq
             else
             {
-                this.CenterFrequency = 3650.01;
-                this.Span = 150.0;
+                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+                this.Span = Math.Abs(this.MaxX - this.MinX);
             }
+            // DivScale Default
+            if (this.DivScale == 0) this.DivScale = 10;
 
             // Min, Max Y to RefLv/DicScale
-            if (this.MinY > 0 && this.MaxY > 0)
+            if (this.MinY == this.MaxY && this.MaxY == 0)
             {
-                this.RefLevel = this.MaxY;
-                this.DivScale = (this.MaxY - this.MinY) / (double)this.NumOfRow;
+                // Default Min, Max Y
+                this.MinY = this.RefLevel - this.DivScale * this.NumOfRow;
+                this.MaxY = this.RefLevel;
             }
 
             else
             {
-                this.RefLevel = 0;
-                this.DivScale = 10;
+                // Max, Min Y가 적절하게 설정되어 있을 때
+                this.RefLevel = this.MaxY;
+                this.DivScale = (this.MaxY - this.MinY) / (double)this.NumOfRow;
             }
 
             if (this.NumOfRow <= 0 && this.NumOfColumn <= 0) this.NumOfRow = this.NumOfColumn = 10;
@@ -171,12 +292,31 @@ namespace GLGraphLib
             this.AxisColor = new RGBcolor(Color.White);
 
             this.IsShowXaxisText = true;
+            this.TotalDataLength = 1001;
+
+            IsVisibleSpectrum = new bool[Trace.MaxTraceCount];
+            SpectrumData = new double[Trace.MaxTraceCount, this.TotalDataLength];
+
+            IsVisibleSpectrum[0] = true; // 첫 trace는 Visible
         }
     }
 
     public partial class BarGraphChart
     {
         #region Properties
+        public static readonly DependencyProperty BarDataProperty = DependencyProperty.Register(
+              "BarData",
+              typeof(double[]),
+              typeof(BarGraphChart),
+              null
+            );
+
+        public double[] BarData
+        {
+            get { return (double[])GetValue(BarDataProperty); }
+            set { SetValue(BarDataProperty, value); }
+        }
+
         /// <summary>
         /// X : Center Frequency (Center X Value)
         /// </summary>

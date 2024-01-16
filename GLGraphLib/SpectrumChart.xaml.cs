@@ -4,6 +4,7 @@ using SharpGL.WPF;
 using System;
 using System.Drawing;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace GLGraphLib
 {
@@ -46,14 +47,24 @@ namespace GLGraphLib
 
         ESpectrumChartMode mode;
 
+        #region public
+        public bool IsSetMinMax = false;
+
+        #endregion
+
+
         public SpectrumChart()
         {
             InitializeComponent();
 
-            screenPositions = new ScreenPositions(Trace.TotalDataLength);
+            // 기본 Total Length 설정
+            TotalDataLength = 1001;
+            screenPositions = new ScreenPositions(TotalDataLength);
+
+            SpectrumData = new double[Trace.MaxTraceCount, TotalDataLength];
 
             marker = new Marker();
-            trace = new Trace();
+            trace = new Trace(TotalDataLength);
 
             specCheckTimer = new Timer(TimerCallBack);
             specCheckTimer.Change(4999, 999); // 1초 1회
@@ -69,6 +80,12 @@ namespace GLGraphLib
             // Dependency Property Set Owner
             IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
 
+            InitProperty();
+
+            for (int i = 0; i < Trace.MaxTraceCount; i++)
+            {
+                trace.SetData(SpectrumData, i, TotalDataLength);
+            }
         }
 
         private void TimerCallBack(object state)
@@ -94,8 +111,18 @@ namespace GLGraphLib
 
         private void OpenGLControl_OpenGLDraw(object sender, SharpGL.WPF.OpenGLRoutedEventArgs args)
         {
+            // 초기 값 적용
+            if (iter == 0)
+            {
+                 // InitProperty();
+            }
+
             // Min, Max 값 적용
-            SetMinMaxXY();
+            if (IsSetMinMax)
+            {
+                SetMinMaxXY();
+                IsSetMinMax = false;
+            }
 
             OpenGL gl = openGLControl.OpenGL;
 
@@ -136,7 +163,7 @@ namespace GLGraphLib
             gl.Flush();
 
             // GL Control 내에서 Draw 할 때 마다 iteration 증가
-            if (iter < 120000) iter++;
+            if (iter < 200000) iter++;
         }
 
         // 스펙트럼의 축을 도시함
@@ -345,6 +372,14 @@ namespace GLGraphLib
         {
             for (int traceIndex = 0; traceIndex < Trace.MaxTraceCount; traceIndex++)
             {
+                // Spectrum Visible 할 때만 가능
+                if (!IsVisibleSpectrum[traceIndex])
+                {
+                    continue;
+                }
+
+                this.MakeTrace(traceIndex);
+
                 // 해당 Index에 대한 Trace 데이터
                 var traceData = trace.GetData(traceIndex);
 
@@ -352,7 +387,7 @@ namespace GLGraphLib
                 {
                     if (IsLoadSample)
                     {
-                        trace.MakeSampleData(traceIndex);
+                        trace.MakeSampleData(traceIndex, TotalDataLength);
                     }
 
                     #region Use Line Strip
@@ -361,9 +396,9 @@ namespace GLGraphLib
                     // Draw Line from points
                     gl.Begin(OpenGL.GL_LINE_STRIP);
                     gl.Color(spectrumColor.R, spectrumColor.G, spectrumColor.B);
-                    for (int i = 0; i < Trace.TotalDataLength; i++)
+                    for (int i = 0; i < TotalDataLength; i++)
                     {
-                        float currentX = SpectrumChartUtil.GetScreenX(i, Trace.TotalDataLength, CurrentControlWidth, PaddingHorizontal);
+                        float currentX = SpectrumChartUtil.GetScreenX(i, TotalDataLength, CurrentControlWidth, PaddingHorizontal);
                         float currentY = SpectrumChartUtil.GetScreenY(traceData[i], MinY, MaxY, CurrentControlHeight, PaddingVertical);
 
                         screenPositions.Set(currentX, currentY, i);
@@ -462,7 +497,7 @@ namespace GLGraphLib
             int totalMarkerPositionCount = marker.GetTotalPosCount();
 
             // 설정된 모든 Marker를 대상으로 Iteration 수행
-            for (int i = 0; i < totalMarkerPositionCount; i++)
+            for (int i = 0; i < Marker.MaxMarkerCount; i++)
             {
                 var markerPt = marker.GetPoints(i);
 
@@ -525,16 +560,70 @@ namespace GLGraphLib
                 marker.RenewSelectedMarker(screenX, valueY);
             }
         }
+
+        private void openGLControl_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            // MinMax 재설정 활성화
+            IsSetMinMax = true;
+
+            // Ctrl + Wheel -> Y축 Scale 변경
+            if (System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control)
+            {
+                var yScale = 5;
+                // Ref Level 값은 고정, Min Y 만 조절하도록
+                if (MaxY == MinY) return;
+
+                if (e.Delta > 0)
+                {
+                    // Zoom in
+                    MinY -= yScale;
+                }
+                else
+                {
+                    // Zoom out
+                    MinY += yScale;
+                }
+
+                if (MinY > MaxY) MaxY = MinY;
+            }
+
+            // X축 Scale 변경
+            else
+            {
+                var xScale = 10;
+                // Center 중심으로 양 쪽으로 펼쳐지도록
+                if (e.Delta > 0)
+                {
+                    // Zoom in
+                    MinX -= xScale;
+                    MaxX += xScale;
+                }
+                else
+                {
+                    // Zoom out
+                    MinX += xScale;
+                    MaxX -= xScale;
+                }
+
+                if (MinX > MaxX) MinX = MaxX = CenterFrequency; 
+            }
+        }
         #endregion
 
         // 축에 표현할 최소/최대 x, y를 Spectrum Parameter(DependencyObject)에서 설정한 값으로 변환해서 적용함
         private void SetMinMaxXY()
         {
-            this.MinX = this.CenterFrequency - this.Span / 2.0;
-            this.MaxX = this.CenterFrequency + this.Span / 2.0;
+            //this.MinX = this.CenterFrequency - this.Span / 2.0;
+            //this.MaxX = this.CenterFrequency + this.Span / 2.0;
 
-            this.MinY = this.RefLevel - this.DivScale * this.NumOfColumn;
-            this.MaxY = this.RefLevel;
+            //this.MinY = this.RefLevel - this.DivScale * this.NumOfColumn;
+            //this.MaxY = this.RefLevel;
+
+            this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+            this.Span = this.MaxX - this.MinX;
+
+            this.RefLevel = this.MaxY;
+            this.DivScale = (this.MaxY - this.MinY) / this.NumOfRow;
         }
 
         #region Marker Interface 
@@ -550,7 +639,7 @@ namespace GLGraphLib
             else
             {
                 // Center Frequency를 기본 Point로 추가
-                var DataLength = Trace.TotalDataLength;
+                var DataLength = TotalDataLength;
 
                 var screenX = SpectrumChartUtil.GetScreenX(DataLength / 2 + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
                 var valueY = screenPositions.GetClosestData(screenX, ref screenX);
@@ -581,11 +670,11 @@ namespace GLGraphLib
         /// </summary>
         /// <param name="data">double array data(max length : Trace.TotalDataLength) </param>
         /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
-        public void MakeTrace(double[] data, int traceIndex)
+        public void MakeTrace(int traceIndex)
         {
             if (!IsLoadSample)
             {
-                trace.SetData(data, traceIndex);
+                trace.SetData(SpectrumData, traceIndex, TotalDataLength);
             }
         }
 
@@ -605,7 +694,7 @@ namespace GLGraphLib
 
             else
             {
-                trace.SetData(new double[1001], traceIndex);
+                trace.SetData(new double[Trace.MaxTraceCount ,TotalDataLength], traceIndex, TotalDataLength);
             }
 
             return true;

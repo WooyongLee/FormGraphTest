@@ -1,5 +1,4 @@
-﻿using GLGraphLib;
-using SharpGL;
+﻿using SharpGL;
 using SharpGL.WPF;
 using System;
 using System.Windows;
@@ -15,12 +14,18 @@ namespace GLGraphLib
         // 반복을 체크함
         int iter = 0;
 
+        BarComponent component;
+
         public BarGraphChart()
         {
             InitializeComponent();
 
+            // Column 개수만큼 생성
+            this.BarData = new double[NumOfColumn];
+
             this.InitProperty();
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
+            component = new BarComponent(this.NumOfColumn);
         }
 
         private void OpenGLControl_OpenGLDraw(object sender, OpenGLRoutedEventArgs args)
@@ -151,11 +156,13 @@ namespace GLGraphLib
         private void DrawBar(OpenGL gl)
         {
             // Sample Data 정의
-            Random random = new Random();
-            double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
-            for ( int i = 0; i < data.Length; i++)
+            if ( IsLoadSample)
             {
-                // data[i] = random.Next(-100, 0);
+                double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
+                for ( int i = 0; i < data.Length; i++)
+                {
+                    component.SetData(data);
+                }
             }
 
             // CnfOfColumn을 벗어난 데이터는 모두 버려야 함
@@ -168,11 +175,13 @@ namespace GLGraphLib
             // Draw the Bar
             for (int i = 0; i < NumOfColumn; i++)
             {
+                var value = component.GetData(i);
+
                 // Calculate the position and size of the current bar
                 var xBottom = PaddingHorizontal + sizeX * i; // x Bottom
                 var yBottom = PaddingVertical + BottomOffset; // y Bottom
                 var barWidth = sizeX * 0.725f;
-                var barHeight = sizeY * CalcUtil.CalculatePercentile(MinY, MaxY, data[i]);
+                var barHeight = sizeY * CalcUtil.CalculatePercentile(MinY, MaxY, value);
 
                 // Draw the current bar
                 gl.Begin(OpenGL.GL_QUADS);
