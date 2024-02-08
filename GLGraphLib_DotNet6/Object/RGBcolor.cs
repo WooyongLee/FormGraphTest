@@ -42,5 +42,12 @@ namespace GLGraphLib
             this.G = c.G / MaxByte;
             this.B = c.B / MaxByte;
         }
+
+        public RGBcolor(RGBcolor color)
+        {
+            this.R = color.R;
+            this.G = color.G;
+            this.B = color.B;
+        }
     }
 }

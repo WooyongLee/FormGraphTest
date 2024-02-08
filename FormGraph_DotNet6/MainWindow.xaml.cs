@@ -145,11 +145,11 @@ namespace FormGraph_DotNet6
             SpectrumChartControl.IsVisibleSpectrum[0] = true;
             // SpectrumChartControl.MakeTrace(0);
 
-            ConstellationChartControl.CH_X = new double[1, 8];
-            ConstellationChartControl.CH_Y = new double[1, 8];
+            //ConstellationChartControl.CH_X = new double[1, 8];
+            //ConstellationChartControl.CH_Y = new double[1, 8];
 
-            ConstellationChartControl.CH_X[0, 0] = 0.1;
-            ConstellationChartControl.CH_Y[0, 0] = 0.1;
+            //ConstellationChartControl.CH_X[0, 0] = 0.1;
+            //ConstellationChartControl.CH_Y[0, 0] = 0.1;
 
         }
 
@@ -174,7 +174,7 @@ namespace FormGraph_DotNet6
 
                     SpectrumChartControl.Visibility = Visibility.Hidden;
                     BarGraphChartControl.Visibility = Visibility.Hidden;
-                    ConstellationChartControl.Visibility = Visibility.Hidden;
+                    // ConstellationChartControl.Visibility = Visibility.Hidden;
 
                     if (btnContent.Contains("Spectrum"))
                     {
@@ -183,12 +183,16 @@ namespace FormGraph_DotNet6
 
                     else if (btnContent.Contains("Constellation"))
                     {
-                        ConstellationChartControl.Visibility = Visibility.Visible;
+                        // ConstellationChartControl.Visibility = Visibility.Visible;
+                        ConstellationChartWindow windows= new ConstellationChartWindow();
+                        windows.Show();
                     }
 
                     else if (btnContent.Contains("Bar"))
                     {
-                        BarGraphChartControl.Visibility = Visibility.Visible;
+                        // BarGraphChartControl.Visibility = Visibility.Visible;
+                        BarChartWindow windows = new BarChartWindow();
+                        windows.Show();
                     }
                 }));
             }

@@ -88,7 +88,7 @@ namespace GLGraphLib
 
         private void TimerCallBack(object? state)
         {
-            Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
+            // Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
             prevIter = iter;
         }
 

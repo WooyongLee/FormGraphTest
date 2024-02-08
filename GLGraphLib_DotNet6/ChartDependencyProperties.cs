@@ -28,6 +28,12 @@ namespace GLGraphLib
             set { SetValue(CH_Y_Property, value); }
         }
 
+        public bool IsShowLegend
+        {
+            get { return (bool)GetValue(IsShowLegendProperty); }
+            set { SetValue(IsShowLegendProperty, value); }
+        }
+
         //public double[,,] ConstellationData
         //{
         //    get { return (double[,,])GetValue(ConstellationDataProperty); }
@@ -56,6 +62,12 @@ namespace GLGraphLib
         //    typeof(ConstellationChart),
         //    null
         //);
+        public static readonly DependencyProperty IsShowLegendProperty = DependencyProperty.Register(
+            "IsShowLegend",
+            typeof(bool),
+            typeof(ConstellationChart),
+            null
+        );
         #endregion
 
         override public void InitProperty()
@@ -75,6 +87,21 @@ namespace GLGraphLib
 
             this.BackgroundColor = new RGBcolor(Color.Black);
             this.AxisColor = new RGBcolor(Color.White);
+        }
+
+        public override void UpdateTheme()
+        {
+            if (this.BackgroundTheme == ETheme.Black)
+            {
+                BackgroundColor = new RGBcolor(Color.Black);
+                AxisColor = new RGBcolor(Color.White);
+            }
+
+            else if(this.BackgroundTheme == ETheme.White)
+            {
+                BackgroundColor = new RGBcolor(Color.White);
+                AxisColor = new RGBcolor(Color.Black);
+            }
         }
     }
 
@@ -291,6 +318,11 @@ namespace GLGraphLib
 
             IsVisibleSpectrum[0] = true; // 첫 trace는 Visible
         }
+
+        public override void UpdateTheme()
+        {
+
+        }
     }
 
     public partial class BarGraphChart
@@ -343,5 +375,11 @@ namespace GLGraphLib
             if (this.AxisColor == null) this.AxisColor = new RGBcolor(Color.White);
             if (this.BarColor == null) this.BarColor = new RGBcolor(Color.Red);
         }
+
+        public override void UpdateTheme()
+        {
+
+        }
     }
+
 }

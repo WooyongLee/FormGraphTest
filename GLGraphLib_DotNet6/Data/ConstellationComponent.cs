@@ -30,7 +30,7 @@ namespace GLGraphLib
         /// <summary>
         /// 각 Channel 표현할 색상
         /// </summary>
-        public Color[] ChannelColors = new Color[] {
+        public static Color[] ChannelColors = new Color[] {
             Color.BlueViolet, Color.Gold, Color.FromArgb(255,254,124,0), Color.Cyan,
             Color.FromArgb(255,129,199,132), Color.FromArgb(255,192,202,51), Color.FromArgb(255,244,67,54), Color.FromArgb(255,46,134,193),
             Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193), Color.Red};

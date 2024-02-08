@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -117,6 +118,12 @@ namespace GLGraphLib
             get { return ( RGBcolor )GetValue(AxisColorProperty); }
             set { SetValue(AxisColorProperty, value);}
         } 
+
+        public ETheme BackgroundTheme
+        {
+            get { return (ETheme)GetValue(BackgroundThemeProperty); }
+            set { SetValue(BackgroundThemeProperty, value); }
+        }
         #endregion
 
         #region Define DependencyProperty from Properties
@@ -210,10 +217,46 @@ namespace GLGraphLib
             typeof(ChartUserControlBase),
             null
         );
+
+        public static readonly DependencyProperty BackgroundThemeProperty = DependencyProperty.Register(
+            "BackgroundTheme",
+            typeof(ETheme),
+            typeof(ChartUserControlBase),
+            new FrameworkPropertyMetadata(ETheme.None, new PropertyChangedCallback(OnThemeChanged))
+            // null
+        );
+
+        private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var baseControl = d as ChartUserControlBase;
+
+            // Exchange foreground to background cross
+            ETheme theme = (ETheme)e.NewValue;
+
+            if (baseControl != null)
+            {
+                switch (theme)
+                {
+                    case ETheme.Black:
+                        baseControl.BackgroundColor = new RGBcolor(Color.Black);
+                        baseControl.AxisColor = new RGBcolor(Color.White);
+                        break;
+
+                    case ETheme.White:
+                        baseControl.BackgroundColor = new RGBcolor(Color.White);
+                        baseControl.AxisColor = new RGBcolor(Color.Black);
+                        break;
+
+                    default: break;
+                }
+            }
+        }
         #endregion
 
 
         // 초기 Dependency Property 값 들을 할당
         public abstract void InitProperty();
+
+        public abstract void UpdateTheme() ;
     }
 }

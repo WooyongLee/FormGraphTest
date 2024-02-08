@@ -1,0 +1,47 @@
+﻿<Window x:Class="FormGraph_DotNet6.BarChartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FormGraph_DotNet6"
+        xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
+        mc:Ignorable="d"
+        Title="BarChartWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <glgraph:BarGraphChart x:Name="BarGraphChartControl" Margin="3"
+                                       Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
+                                       MaxY="0" MinY="-100" MaxX="7" MinX="0">
+            </glgraph:BarGraphChart>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Vertical" Margin="5">
+                <TextBlock Text=" Control Panel" ></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  Text="Theme Background Color" ></TextBlock>
+                    <RadioButton x:Name="BlackRadioButton"  Margin="10, 2, 5, 2" Content="Black "></RadioButton>
+                    <RadioButton x:Name="WhiteRadioButton" Margin="5, 2" Content="White"></RadioButton>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0, 3" Text="Count Of Bar : "></TextBlock>
+                    <TextBox x:Name="BarCountTextBox" Margin="0, 3" Text="3" Width="30" ></TextBox>
+                    <!-- Auto Bar Naming-->
+                    <Button x:Name="BarDataAutoGenButton" Margin="6, 1" Content=" Bar Auto Generate " Click="BarDataAutoGenButton_Click"></Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Max X = "></TextBlock>
+                    <TextBox x:Name="MaxXTextBox" Width="30"></TextBox>
+                    <TextBlock Text=" | Max Y = "></TextBlock>
+                    <TextBox x:Name="MaxYTextBox" Width="30"></TextBox>
+                    <Button x:Name="GenerateSampleButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

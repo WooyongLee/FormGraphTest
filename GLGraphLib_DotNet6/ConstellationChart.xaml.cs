@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel;
+using System.Drawing.Printing;
 using SharpGL;
+using SharpGL.SceneGraph;
 using SharpGL.WPF;
 
 namespace GLGraphLib
@@ -12,7 +14,7 @@ namespace GLGraphLib
     {
         // drawing iteration
         int iter = 0;
-
+        float Legend_Offset = 50;
         ConstellationComponent component;
 
         public ConstellationChart()
@@ -43,6 +45,19 @@ namespace GLGraphLib
                 CurrentControlWidth = this.ActualWidth;
                 CurrentControlHeight = this.ActualHeight;
             }));
+
+            var yScaledPadding = IsShowLegend ? PaddingVertical + Legend_Offset : PaddingVertical;
+            var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
+
+            var ScreenMaxX = Math.Round(CurrentControlWidth) - PaddingHorizontal - PaddingHorizontal;
+            var ScreenMaxY = Math.Round(scaledHeight) - PaddingVertical - PaddingVertical;
+
+            var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
+
+            float x = (float)((CH_X[3, 3] - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
+            float y = (float)((CH_Y[3, 3] - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+
+            Console.WriteLine("ScreenStandard = " + ScreenStandard + ", x = " + x + " , y = " + y);
         }
 
         // 축을 표현하는 격자를 도시함
@@ -58,13 +73,17 @@ namespace GLGraphLib
             //gl.Vertex(CurrentControlWidth, 0);
             //gl.End();
 
+            var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
+
             // Calculate the size of each square based on the row and column spacing
-            int size = (int)Math.Min((CurrentControlWidth - (PaddingHorizontal + PaddingHorizontal)) / NumOfColumn,
-                (CurrentControlHeight - (PaddingVertical + PaddingVertical)) / NumOfRow);
+            var colSize = (CurrentControlWidth - (PaddingHorizontal + PaddingHorizontal)) / NumOfColumn;
+            var rowSize = (scaledHeight - (PaddingVertical + PaddingVertical)) / NumOfRow;
+
+            int size = (int)Math.Min(colSize, rowSize);
 
             // Calculate the starting position for drawing the chart(원점은 7시 기준)
             var startX = PaddingHorizontal;
-            var startY = PaddingVertical;
+            var startY = IsShowLegend ? PaddingVertical + Legend_Offset : PaddingVertical;
 
             // Draw the chart
             for (int row = 0; row < NumOfRow; row++)
@@ -77,7 +96,7 @@ namespace GLGraphLib
 
                     // Draw the current square
                     gl.Begin(OpenGL.GL_LINE_LOOP);
-                    gl.Color(1.0f, 1.0f, 1.0f);
+                    gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
                     // gl.LineWidth(2.0f); // LineWidth 적용 시 Text 도시에 문제 발생
                     gl.Vertex(x, y, 0.0f);
                     gl.Vertex(x + size, y, 0.0f);
@@ -104,17 +123,23 @@ namespace GLGraphLib
             int xAxisXoffset = 10;
             int yAxisYOffset = 10;
 
+            var ScaledHeight = IsShowLegend ? (int)CurrentControlHeight - Legend_Offset : (int)CurrentControlHeight;
+
             var ScreenMinX = PaddingHorizontal - MarginX - xOffset;
             var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal - PaddingHorizontal + xOffset;
-            var ScreenMinY = PaddingVertical - MarginY;
-            var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical - PaddingVertical + MarginY ;
+            // var ScreenMinY = (int)PaddingVertical - MarginY;
+            var ScreenMinY = (IsShowLegend ? (int)PaddingVertical + Legend_Offset : (int)PaddingVertical) - MarginY;
+            var ScreenMaxY = (int)ScaledHeight - PaddingVertical - PaddingVertical + MarginY ;
+
+            var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
+            var LegendOffset = IsShowLegend ? 50 : 0;
 
             // Set the color to white
-            gl.Color(1.0f, 1.0f, 1.0f);
+            gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
 
             // 최 외곽 Max 도시
-            DrawText(gl, MaxX, ScreenMaxX + xAxisXoffset, ScreenMinY, fontsize);
-            DrawText(gl, MaxY, ScreenMinX, ScreenMaxY + yAxisYOffset, fontsize);
+            DrawText(gl, MaxX, ScreenStandard + xAxisXoffset, ScreenMinY, fontsize);
+            DrawText(gl, MaxY, ScreenMinX, ScreenStandard + yAxisYOffset + LegendOffset, fontsize);
           
             // 원점지역 Min 도시
             if (MinX == MinY)
@@ -138,7 +163,7 @@ namespace GLGraphLib
                 {
                     // X 우측 방향으로 xAxisXOffset 만큼 밀어버림
                     var valueX = (MinX * (NumOfRow - i) + (MaxX * i)) / NumOfRow;
-                    var screenX = (ScreenMinX * (NumOfRow - i) + (ScreenMaxX * i)) / NumOfRow + xAxisXoffset;
+                    var screenX = (ScreenMinX * (NumOfRow - i) + (ScreenStandard * i)) / NumOfRow + xAxisXoffset;
 
                     DrawText(gl, valueX, screenX, ScreenMinY, fontsize);
                 }
@@ -151,7 +176,7 @@ namespace GLGraphLib
                 {
                     // Y 위쪽 방향으로 yAxisYOffset 만큼 올림
                     var valueY = (MinY * (NumOfColumn - i) + (MaxY * i)) / NumOfColumn;
-                    var screenY = (ScreenMinY * (NumOfColumn - i) + (ScreenMaxY * i)) / NumOfColumn + yAxisYOffset;
+                    var screenY = (ScreenMinY * (NumOfColumn - i) + ((LegendOffset + ScreenStandard) * i)) / NumOfColumn + yAxisYOffset;
 
                     DrawText(gl, valueY, ScreenMinX, screenY, fontsize);
                 }
@@ -165,7 +190,17 @@ namespace GLGraphLib
             string strValue = string.Format("{0,5:N1}", value);
 
             // Draw Text
-            gl.DrawText((int)x, (int)y, 1.0f, 1.0f, 1.0f, GLUtil.FONT, size, strValue);
+            gl.DrawText((int)x, (int)y, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, size, strValue);
+        }
+
+        private void DrawText(OpenGL gl, string strText, float x, float y, float size = 12.0f)
+        {
+            var encodingBytes = System.Text.Encoding.ASCII.GetBytes(strText);
+
+            var encodingStr = System.Text.Encoding.UTF8.GetString(encodingBytes);
+
+            // Draw Text -> Font는 vendana로 고정, MS. San Sarif 사용 시 의도하지 않은 문자열을 도시함
+            gl.DrawText((int)x, (int)y, AxisColor.R, AxisColor.G, AxisColor.B, "verdana", size, encodingStr);
         }
 
         // Create Sample Data
@@ -177,23 +212,15 @@ namespace GLGraphLib
             component.SetChannelValue(CH_X, 0, 0, 0.0);
             component.SetChannelValue(CH_Y, 0, 0, 0.0);
 
+            int row = 8;
+
             // 4 Channel Test
-            for ( int i = 0; i < 4; i++)
+            for ( int i = 0; i < 8; i++)
             {
-                for (int j = 0; j <= 10; j++)
+                for (int j = 0; j <= row; j++)
                 {
-                    //var randomValue = random.Next(-1, 1);
-                    //var randomValue2 = random2.Next(-1, 1);
-                    var randomValue = random.Next(2) == 0 ? -1 : 1;
-                    var randomValue2 = random2.Next(2) == 0 ? -1 : 1;
-
-                    var randomOffsetX = random.Next(-20, 20) / 100.0;
-                    var randomOffsetY = random2.Next(-20, 20) / 100.0;
-
-                    if (randomValue == 0 || randomValue2 == 0) continue;
-
-                    component.SetChannelValue(CH_X, i, j, randomValue - randomValue2 * randomOffsetX);
-                    component.SetChannelValue(CH_Y, i, j, randomValue2 - randomValue * randomOffsetY);
+                    component.SetChannelValue(CH_X, i, j, j * 0.5 - 2);
+                    component.SetChannelValue(CH_Y, i, j, 2 - i * 0.5 );
                 }
             }
         }
@@ -209,6 +236,16 @@ namespace GLGraphLib
 
             var xLength = CH_X.Length;
             var yLength = CH_Y.Length;
+
+            var yScaledPadding = IsShowLegend ? PaddingVertical + Legend_Offset : PaddingVertical;
+
+            var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
+
+            var ScreenMaxX = Math.Round(CurrentControlWidth) - PaddingHorizontal - PaddingHorizontal;
+            var ScreenMaxY = Math.Round(scaledHeight) - PaddingVertical - PaddingVertical;
+
+            var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
+
             for ( int i = 0; i < ConstellationComponent.MaxChannel; i++)
             {
                 for ( int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
@@ -226,14 +263,18 @@ namespace GLGraphLib
 
                     if ( CH_X[i, j] != 0 && CH_Y[i, j] != 0)
                     {
-                        float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
-                        float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * (CurrentControlHeight - PaddingVertical * 2)) + PaddingVertical;
-
+                        //float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
+                        //float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * (CurrentControlHeight - yScaledPadding * 2)) + yScaledPadding;
+                        float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * ScreenStandard) + PaddingHorizontal;
+                        float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+                        
+                        #region Min/Max 처리
                         // Min/Max 처리
                         if (CH_X[i, j] < MinX) x = PaddingHorizontal;
                         if (CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
-                        if (CH_Y[i, j] < MinY) y = PaddingVertical;
-                        if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - PaddingVertical;
+                        if (CH_Y[i, j] < MinY) y = yScaledPadding;
+                        if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - yScaledPadding;
+                        #endregion
 
                         // gl.Color(1.0f, 1.0f, 0.0f); // yellow
                         gl.Color(component.GetNormalizedR(i), component.GetNormalizedG(i), component.GetNormalizedB(i));
@@ -251,8 +292,10 @@ namespace GLGraphLib
             // Get the OpenGL object
             OpenGL gl = openGLControl.OpenGL;
 
+            // UpdateTheme();
+
             // Set the clear color and clear the color buffer and depth buffer
-            gl.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            gl.ClearColor(BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, 0.0f);
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
             // Set up the projection matrix
@@ -264,7 +307,7 @@ namespace GLGraphLib
             gl.LoadIdentity();
 
             // Set the color to black
-            gl.Color(0.0f, 0.0f, 0.0f);
+            gl.Color(BackgroundColor.R, BackgroundColor.G, BackgroundColor.B);
 
             gl.PushMatrix();
 
@@ -277,10 +320,50 @@ namespace GLGraphLib
             // 데이터를 그림
             DrawData(gl);
 
+            // 범례를 그림
+            DrawLegend(gl);
+
             gl.PopMatrix();
 
             // Flush OpenGL
             gl.Flush();
+        }
+
+        private void DrawLegend(OpenGL gl)
+        {
+            if (IsShowLegend)
+            {
+                // 임시로 Sample Data 도시
+                string[] strLegendContent = { "legend1", "legend2", "long_legend" };
+
+                // Legend Position
+                int StartX = 10;
+                int StartY = (int)Legend_Offset - 5;
+                int xPosition = StartX;
+                int yPosition = StartY;
+                int index = 0;
+
+                int rectangleX = 4;
+                int rectangleY = 12; 
+
+                foreach (var strContent in strLegendContent)
+                {
+                    // Draw Rectangle
+                    gl.Color(ConstellationComponent.ChannelColors[index].R, ConstellationComponent.ChannelColors[index].G, ConstellationComponent.ChannelColors[index].B);
+
+                    gl.Begin(OpenGL.GL_QUADS);
+                    gl.Vertex(xPosition + rectangleX, yPosition, 0.0f);
+                    gl.Vertex(xPosition + rectangleY, yPosition, 0.0f);
+                    gl.Vertex(xPosition + rectangleY, yPosition - (rectangleY - rectangleX), 0.0f);
+                    gl.Vertex(xPosition + rectangleX, yPosition - (rectangleY - rectangleX), 0.0f);
+                    gl.End();
+
+                    DrawText(gl, strContent, xPosition + rectangleY + 10, StartY - 8, 10);
+
+                    xPosition = xPosition + strContent.Length * 10 + 10;
+                    index++;
+                }
+            }
         }
     }
 }
