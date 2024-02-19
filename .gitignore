@@ -20,3 +20,10 @@
 /GLGraphLib/obj/Debug/SpectrumChart.baml
 /GLGraphLib/obj/Debug/SpectrumChart.g.cs
 /GLGraphLib/obj/Debug/SpectrumChart.g.i.cs
+/GLGraphLib/bin/Debug/GLGraphLib.dll
+/GLGraphLib/bin/Debug/GLGraphLib.pdb
+/Common_GLGraph/obj/Common_GLGraph.csproj.nuget.dgspec.json
+/Common_GLGraph/obj/Common_GLGraph.csproj.nuget.g.props
+/Common_GLGraph/obj/Common_GLGraph.csproj.nuget.g.targets
+/Common_GLGraph/obj/project.assets.json
+/Common_GLGraph/obj/project.nuget.cache

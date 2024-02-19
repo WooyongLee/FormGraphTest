@@ -36,9 +36,9 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Max X = "></TextBlock>
-                    <TextBox x:Name="MaxXTextBox" Width="30"></TextBox>
+                    <TextBox x:Name="MaxXTextBox" Width="30" Text="2"></TextBox>
                     <TextBlock Text=" | Max Y = "></TextBlock>
-                    <TextBox x:Name="MaxYTextBox" Width="30"></TextBox>
+                    <TextBox x:Name="MaxYTextBox" Width="30" Text="2"></TextBox>
                     <Button x:Name="GenerateSampleButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
                 </StackPanel>
             </StackPanel>

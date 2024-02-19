@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media.Animation;
 
 // 해당 파일은 Dependency Object들을 정의
@@ -34,6 +36,12 @@ namespace GLGraphLib
             set { SetValue(IsShowLegendProperty, value); }
         }
 
+        public List<string> StrLegend
+        {
+            get { return (List<string>)GetValue(StrLegendProperty); }
+            set { SetValue(StrLegendProperty, value); }
+        }
+
         //public double[,,] ConstellationData
         //{
         //    get { return (double[,,])GetValue(ConstellationDataProperty); }
@@ -65,6 +73,13 @@ namespace GLGraphLib
         public static readonly DependencyProperty IsShowLegendProperty = DependencyProperty.Register(
             "IsShowLegend",
             typeof(bool),
+            typeof(ConstellationChart),
+            null
+        );
+
+        public static readonly DependencyProperty StrLegendProperty = DependencyProperty.Register(
+            "StrLegend",
+            typeof(List<string>),
             typeof(ConstellationChart),
             null
         );

@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace FormGraph_DotNet6
@@ -26,12 +28,44 @@ namespace FormGraph_DotNet6
 
         private void GenerateSampleButton_Click(object sender, RoutedEventArgs e)
         {
+            this.ConstellationChartControl.MaxX = double.Parse(this.MaxXTextBox.Text);
+            this.ConstellationChartControl.MinX = -double.Parse(this.MaxXTextBox.Text);
+
+            this.ConstellationChartControl.MaxY = double.Parse(this.MaxYTextBox.Text);
+            this.ConstellationChartControl.MinY = -double.Parse(this.MaxYTextBox.Text);
+
             this.ConstellationChartControl.IsLoadSample = true;
+
+            Random random = new Random();
+            Random random2 = new Random();
+
+            // 원점
+            this.ConstellationChartControl.CH_X[0, 0] = 0.0;
+            this.ConstellationChartControl.CH_Y[0, 0] = 0.0;
+
+            // 각 x, y 축의 만나는 부분의 점
+            int row = 8;
+
+            // 4 Channel Test
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j <= row; j++)
+                {
+                    this.ConstellationChartControl.CH_X[i, j] = j * 0.5 - 2;
+                    this.ConstellationChartControl.CH_Y[i, j] = 2 - i * 0.5;
+                }
+            }
         }
 
         private void LegendAutoGenButton_Click(object sender, RoutedEventArgs e)
         {
-            // this.ConstellationChartControl.IsShowLegend = !this.ConstellationChartControl.IsShowLegend;
+            int countOfLegend = int.Parse(LegendCountTextBox.Text);
+
+            this.ConstellationChartControl.StrLegend = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < countOfLegend; i++)
+            {
+                this.ConstellationChartControl.StrLegend.Add("legend " + (i + 1).ToString());
+            }
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)

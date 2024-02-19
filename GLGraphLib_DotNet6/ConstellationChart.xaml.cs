@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Printing;
+using System.Windows.Shapes;
 using SharpGL;
 using SharpGL.SceneGraph;
 using SharpGL.WPF;
@@ -54,10 +56,10 @@ namespace GLGraphLib
 
             var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
 
-            float x = (float)((CH_X[3, 3] - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
-            float y = (float)((CH_Y[3, 3] - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+            float x = (float)((0 - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
+            float y = (float)((0 - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
 
-            Console.WriteLine("ScreenStandard = " + ScreenStandard + ", x = " + x + " , y = " + y);
+            // Console.WriteLine("ScreenStandard = " + ScreenStandard + ", x = " + x + " , y = " + y);
         }
 
         // 축을 표현하는 격자를 도시함
@@ -76,10 +78,10 @@ namespace GLGraphLib
             var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
 
             // Calculate the size of each square based on the row and column spacing
-            var colSize = (CurrentControlWidth - (PaddingHorizontal + PaddingHorizontal)) / NumOfColumn;
-            var rowSize = (scaledHeight - (PaddingVertical + PaddingVertical)) / NumOfRow;
+            var colSize = (CurrentControlWidth - (PaddingHorizontal + PaddingHorizontal)) / (float)NumOfColumn;
+            var rowSize = (scaledHeight - (PaddingVertical + PaddingVertical)) / (float)NumOfRow;
 
-            int size = (int)Math.Min(colSize, rowSize);
+            float size = (float)Math.Min(colSize, rowSize);
 
             // Calculate the starting position for drawing the chart(원점은 7시 기준)
             var startX = PaddingHorizontal;
@@ -231,7 +233,7 @@ namespace GLGraphLib
             // 임의로 샘플 데이터 도시
             if (IsLoadSample)
             {
-                MakeDataForTest();
+                // MakeDataForTest();
             }
 
             var xLength = CH_X.Length;
@@ -334,36 +336,50 @@ namespace GLGraphLib
             if (IsShowLegend)
             {
                 // 임시로 Sample Data 도시
-                string[] strLegendContent = { "legend1", "legend2", "long_legend" };
+                // string[] strLegendContent = { "legend1", "legend2", "long_legend" };
 
-                // Legend Position
-                int StartX = 10;
-                int StartY = (int)Legend_Offset - 5;
-                int xPosition = StartX;
-                int yPosition = StartY;
-                int index = 0;
+                // Define the maximum length for a line
+                var maxLineWidth = Math.Round(CurrentControlWidth) - PaddingHorizontal * 3; // Adjust this value as needed
 
-                int rectangleX = 4;
-                int rectangleY = 12; 
-
-                foreach (var strContent in strLegendContent)
+                if (StrLegend != null)
                 {
-                    // Draw Rectangle
-                    gl.Color(ConstellationComponent.ChannelColors[index].R, ConstellationComponent.ChannelColors[index].G, ConstellationComponent.ChannelColors[index].B);
+                    // Legend Position
+                    int StartX = 10;
+                    int StartY = (int)Legend_Offset - 5;
+                    int xPosition = StartX;
+                    int yPosition = StartY;
+                    int index = 0;
 
-                    gl.Begin(OpenGL.GL_QUADS);
-                    gl.Vertex(xPosition + rectangleX, yPosition, 0.0f);
-                    gl.Vertex(xPosition + rectangleY, yPosition, 0.0f);
-                    gl.Vertex(xPosition + rectangleY, yPosition - (rectangleY - rectangleX), 0.0f);
-                    gl.Vertex(xPosition + rectangleX, yPosition - (rectangleY - rectangleX), 0.0f);
-                    gl.End();
+                    const int rectangleX = 4;
+                    const int rectangleY = 12;
 
-                    DrawText(gl, strContent, xPosition + rectangleY + 10, StartY - 8, 10);
+                    foreach (var strContent in StrLegend)
+                    {
+                        // Draw Rectangle
+                        gl.Color(ConstellationComponent.ChannelColors[index].R, ConstellationComponent.ChannelColors[index].G, ConstellationComponent.ChannelColors[index].B);
 
-                    xPosition = xPosition + strContent.Length * 10 + 10;
-                    index++;
-                }
-            }
+                        gl.Begin(OpenGL.GL_QUADS);
+                        gl.Vertex(xPosition + rectangleX, yPosition, 0.0f);
+                        gl.Vertex(xPosition + rectangleY, yPosition, 0.0f);
+                        gl.Vertex(xPosition + rectangleY, yPosition - (rectangleY - rectangleX), 0.0f);
+                        gl.Vertex(xPosition + rectangleX, yPosition - (rectangleY - rectangleX), 0.0f);
+                        gl.End();
+
+                        DrawText(gl, strContent, xPosition + rectangleY + 10, yPosition - 8, 10);
+
+                        xPosition += (strContent.Length * 10);
+
+                        // Set Next Position
+                        if (xPosition > maxLineWidth)
+                        {
+                            xPosition = StartX; // reset to front
+                            yPosition -= 10; // enter 1 line
+                        }
+
+                        index++;
+                    } // end foreach (var strContent in StrLegend)
+                } // end if (StrLegend != null)
+            } // end if (IsShowLegend)
         }
     }
 }
