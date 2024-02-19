@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Media.Animation;
 
@@ -343,10 +344,16 @@ namespace GLGraphLib
     public partial class BarGraphChart
     {
         #region Properties
-        public double[] BarData
+        public List<double> BarData
         {
-            get { return (double[])GetValue(BarDataProperty); }
+            get { return (List<double>)GetValue(BarDataProperty); }
             set { SetValue(BarDataProperty, value); }
+        }
+
+        public List<string> BarLegend
+        {
+            get { return (List<string>)GetValue(BarLegendProperty); }
+            set { SetValue(BarLegendProperty, value); }
         }
 
         /// <summary>
@@ -362,7 +369,14 @@ namespace GLGraphLib
         #region Define DependencyProperty from Properties
         public static readonly DependencyProperty BarDataProperty = DependencyProperty.Register(
             "BarData",
-            typeof(double[]),
+            typeof(List<double>),
+            typeof(BarGraphChart),
+            null
+        );
+
+        public static readonly DependencyProperty BarLegendProperty = DependencyProperty.Register(
+            "BarLegend",
+            typeof(List<string>),
             typeof(BarGraphChart),
             null
         );

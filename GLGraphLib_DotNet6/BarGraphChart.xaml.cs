@@ -2,7 +2,6 @@
 using SharpGL.WPF;
 using System;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace GLGraphLib
 {
@@ -20,13 +19,27 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
-            // Column 개수만큼 생성
-            this.BarData = new double[NumOfColumn];
-
             this.InitProperty();
+            this.SizeChanged += BarGraphChart_SizeChanged;
+            this.openGLControl.Resized += OpenGLControl_Resized;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
 
             component = new BarComponent(this.NumOfColumn);
+        }
+
+        private void OpenGLControl_Resized(object sender, OpenGLRoutedEventArgs args)
+        {
+            OpenGL gl = openGLControl.OpenGL;
+            gl.Viewport(0, 0, (int)openGLControl.Width, (int)openGLControl.Height);
+        }
+
+        private void BarGraphChart_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                CurrentControlWidth = this.ActualWidth;
+                CurrentControlHeight = this.ActualHeight;
+            }));
         }
 
         private void OpenGLControl_OpenGLDraw(object sender, OpenGLRoutedEventArgs args)
@@ -86,23 +99,23 @@ namespace GLGraphLib
                     gl.Begin(OpenGL.GL_LINE_LOOP);
                     gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
                     gl.Vertex(x, y, 0.0f);
-                    gl.Vertex(x + sizeX, y, 0.0f);
-                    gl.Vertex(x + sizeX, y + sizeY, 0.0f);
                     gl.Vertex(x, y + sizeY, 0.0f);
+                    gl.Vertex(x + sizeX, y + sizeY, 0.0f);
+                    gl.Vertex(x + sizeX, y, 0.0f);
                     gl.End();
                 }
             }
 
             // 테두리는 가장 위로 오도록 그리기
             float zValue = 0.5f;
-            sizeX = (int)(CurrentControlWidth - PaddingHorizontal * 2);
-            sizeY = (int)(CurrentControlHeight - PaddingVertical * 2);
-            gl.Begin(OpenGL.GL_LINE_LOOP);
+            sizeX = (int)(CurrentControlWidth - PaddingHorizontal * 2) + 1;
+            sizeY = (int)(CurrentControlHeight - PaddingVertical * 2) - 1;
+            gl.Begin(OpenGL.GL_LINES);
             gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
             gl.Vertex(PaddingHorizontal, PaddingVertical, zValue);
-            gl.Vertex(PaddingHorizontal + sizeX, PaddingVertical, zValue);
-            gl.Vertex(PaddingHorizontal + sizeX, PaddingVertical + sizeY, zValue);
             gl.Vertex(PaddingHorizontal, PaddingVertical + sizeY, zValue);
+            gl.Vertex(PaddingHorizontal + sizeX, PaddingVertical + sizeY, zValue);
+            // gl.Vertex(PaddingHorizontal + sizeX, PaddingVertical, zValue);
             gl.End();
         }
 
@@ -119,7 +132,7 @@ namespace GLGraphLib
             //int TopOffset = (int)(MarginY * (2.0 / 3.0));
             //int LeftfOffset = (int)(MarginX * (2.0 / 3.0));
             int xOffset = 5;
-            int xAxisXoffset = 10 + (int)CurrentControlWidth / 14;
+            int xAxisXoffset = MarginX - xOffset;
             int yAxisYOffset = 10;
 
             var ScreenMinX = PaddingHorizontal - MarginX - xOffset;
@@ -128,19 +141,27 @@ namespace GLGraphLib
             var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical * 2 + MarginY;
 
             // Column
-            // 각 Content는 칸에 들어가기 때문에 조정함
+            // 각 Content는 칸에 들어가기 때문에 조정함, 가운데 정렬
             int numOfColSpace = NumOfColumn - 1;
             for (int i = 0; i < NumOfColumn; i++)
             {
                 // X 우측 방향으로 xAxisOffset 만큼 넓힘
-                var valueX = (MinX * (numOfColSpace - i) + (MaxX * i)) / numOfColSpace;
-                var screenX = (ScreenMinX * (NumOfColumn - i) + (ScreenMaxX * i)) / NumOfColumn + xAxisXoffset;
+                // var valueX = (MinX * (numOfColSpace - i) + (MaxX * i)) / numOfColSpace;
+                var screenX0 = (ScreenMinX * (NumOfColumn + xOffset) + (ScreenMaxX * i)) / NumOfColumn;
+                var screenX1 = (ScreenMinX * (NumOfColumn + xOffset) + (ScreenMaxX * (i+1))) / NumOfColumn;
+                var screenX = (screenX0 + screenX1) / 2.0 + xAxisXoffset;
 
-                GLUtil.DrawFormattedText(gl, valueX, (int)screenX, (int)ScreenMinY, AxisColor, 2, fontsize);
+                if (BarLegend != null)
+                {
+                    if (i < BarLegend.Count)
+                    {
+                        GLUtil.DrawText(gl, BarLegend[i], (int)screenX, (int)ScreenMinY, AxisColor, fontsize);
+                    }
+                }
             }
 
             // Row -> 각 칸 사이사이에 Min ... Max 
-            for (int i = 0; i <= NumOfRow ; i++)
+            for (int i = 0; i <= NumOfRow; i++)
             {
                 // Y 위쪽 방향으로 yAxisYOffset 만큼 올림
                 var valueY = (MinY * (NumOfRow - i) + (MaxY * i)) / NumOfRow;
@@ -148,7 +169,7 @@ namespace GLGraphLib
 
                 GLUtil.DrawFormattedText(gl, valueY, (int)ScreenMinX, (int)screenY, AxisColor, 2, fontsize);
             }
-            
+
             // 최 좌측 상단에 단위 도시 (y)
             gl.DrawText((int)ScreenMinX, (int)ScreenMaxY + yAxisYOffset * 3, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, fontsize, "(dBm)");
         }
@@ -156,9 +177,6 @@ namespace GLGraphLib
         // Bar를 도시함
         private void DrawBar(OpenGL gl)
         {
-            // Sample Data 정의
-            Random random = new Random();
-
             if (IsLoadSample)
             {
                 double[] data = new double[] { -10, -20, -30, -40, -50.0, -60, -70.0, -80, -90 };
@@ -167,15 +185,13 @@ namespace GLGraphLib
 
             else
             {
-                component.SetData(this.BarData);
+                if (BarData != null)
+                {
+                    component.SetData(this.BarData.ToArray());
+                }
             }
-            //for ( int i = 0; i < data.Length; i++)
-            //{
-            //    // data[i] = random.Next(-100, 0);
-            //}
 
             // CnfOfColumn을 벗어난 데이터는 모두 버려야 함
-
             // Calculate the size of each square based on the row and column spacing
             int sizeX = (int)((CurrentControlWidth - PaddingHorizontal * 2) / NumOfColumn);
             int sizeY = (int)(CurrentControlHeight - PaddingVertical * 2);

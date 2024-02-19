@@ -9,7 +9,7 @@
         Title="BarChartWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
             <RowDefinition Height="1*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -25,20 +25,20 @@
                 <TextBlock Text=" Control Panel" ></TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock  Text="Theme Background Color" ></TextBlock>
-                    <RadioButton x:Name="BlackRadioButton"  Margin="10, 2, 5, 2" Content="Black "></RadioButton>
-                    <RadioButton x:Name="WhiteRadioButton" Margin="5, 2" Content="White"></RadioButton>
+                    <RadioButton x:Name="BlackRadioButton"  Margin="10, 2, 5, 2" IsChecked="True" Content="Black " Checked="RadioButton_Checked"></RadioButton>
+                    <RadioButton x:Name="WhiteRadioButton" Margin="5, 2" Content="White" Checked="RadioButton_Checked"></RadioButton>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="0, 3" Text="Count Of Bar : "></TextBlock>
-                    <TextBox x:Name="BarCountTextBox" Margin="0, 3" Text="3" Width="30" ></TextBox>
+                    <TextBox x:Name="BarCountTextBox" Margin="0, 3" Text="8" Width="30" ></TextBox>
                     <!-- Auto Bar Naming-->
                     <Button x:Name="BarDataAutoGenButton" Margin="6, 1" Content=" Bar Auto Generate " Click="BarDataAutoGenButton_Click"></Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Max X = "></TextBlock>
-                    <TextBox x:Name="MaxXTextBox" Width="30"></TextBox>
-                    <TextBlock Text=" | Max Y = "></TextBlock>
-                    <TextBox x:Name="MaxYTextBox" Width="30"></TextBox>
+                    <TextBlock Text="Max Y = "></TextBlock>
+                    <TextBox x:Name="MaxYTextBox" Width="30" Text="0"></TextBox>
+                    <TextBlock Text=" | Step Y = "></TextBlock>
+                    <TextBox x:Name="StepYTextBox" Width="30" Text="20"></TextBox>
                     <Button x:Name="GenerateSampleButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
                 </StackPanel>
             </StackPanel>

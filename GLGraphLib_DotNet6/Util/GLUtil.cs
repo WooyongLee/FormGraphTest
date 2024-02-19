@@ -76,5 +76,15 @@ namespace GLGraphLib
             // Draw Text
             gl.DrawText(x, y, c.R, c.G, c.B, FONT, size, strValue);
         }
+
+        public static void DrawText(OpenGL gl, string strText, float x, float y, RGBcolor c, float size = 12.0f)
+        {
+            var encodingBytes = System.Text.Encoding.ASCII.GetBytes(strText);
+
+            var encodingStr = System.Text.Encoding.UTF8.GetString(encodingBytes);
+
+            // Draw Text -> Font는 vendana로 고정, MS. San Sarif 사용 시 의도하지 않은 문자열을 도시함
+            gl.DrawText((int)x, (int)y, c.R, c.G, c.B, "verdana", size, encodingStr);
+        }
     }
 }

@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing.Printing;
-using System.Windows.Shapes;
 using SharpGL;
-using SharpGL.SceneGraph;
 using SharpGL.WPF;
+using System;
 
 namespace GLGraphLib
 {
@@ -25,8 +20,8 @@ namespace GLGraphLib
 
             CH_X = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
             CH_Y = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
-            component = new ConstellationComponent(CH_X,CH_Y);
-            
+            component = new ConstellationComponent(CH_X, CH_Y);
+
             this.SizeChanged += ConstellationChart_SizeChanged;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
             this.openGLControl.Resized += OpenGLControl_Resized;
@@ -65,16 +60,6 @@ namespace GLGraphLib
         // 축을 표현하는 격자를 도시함
         private void DrawIQConstellationAxis(OpenGL gl)
         {
-            // Draw the outer square (주석)
-            //gl.Begin(OpenGL.GL_LINE_LOOP);
-            //gl.Color(1.0f, 1.0f, 0.0f);
-            //gl.LineWidth(5.0f);
-            //gl.Vertex(0, 0);
-            //gl.Vertex(0, CurrentControlHeight);
-            //gl.Vertex(CurrentControlWidth, CurrentControlHeight);
-            //gl.Vertex(CurrentControlWidth, 0);
-            //gl.End();
-
             var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
 
             // Calculate the size of each square based on the row and column spacing
@@ -131,7 +116,7 @@ namespace GLGraphLib
             var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal - PaddingHorizontal + xOffset;
             // var ScreenMinY = (int)PaddingVertical - MarginY;
             var ScreenMinY = (IsShowLegend ? (int)PaddingVertical + Legend_Offset : (int)PaddingVertical) - MarginY;
-            var ScreenMaxY = (int)ScaledHeight - PaddingVertical - PaddingVertical + MarginY ;
+            var ScreenMaxY = (int)ScaledHeight - PaddingVertical - PaddingVertical + MarginY;
 
             var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
             var LegendOffset = IsShowLegend ? 50 : 0;
@@ -142,7 +127,7 @@ namespace GLGraphLib
             // 최 외곽 Max 도시
             DrawText(gl, MaxX, ScreenStandard + xAxisXoffset, ScreenMinY, fontsize);
             DrawText(gl, MaxY, ScreenMinX, ScreenStandard + yAxisYOffset + LegendOffset, fontsize);
-          
+
             // 원점지역 Min 도시
             if (MinX == MinY)
             {
@@ -195,16 +180,6 @@ namespace GLGraphLib
             gl.DrawText((int)x, (int)y, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, size, strValue);
         }
 
-        private void DrawText(OpenGL gl, string strText, float x, float y, float size = 12.0f)
-        {
-            var encodingBytes = System.Text.Encoding.ASCII.GetBytes(strText);
-
-            var encodingStr = System.Text.Encoding.UTF8.GetString(encodingBytes);
-
-            // Draw Text -> Font는 vendana로 고정, MS. San Sarif 사용 시 의도하지 않은 문자열을 도시함
-            gl.DrawText((int)x, (int)y, AxisColor.R, AxisColor.G, AxisColor.B, "verdana", size, encodingStr);
-        }
-
         // Create Sample Data
         public void MakeDataForTest()
         {
@@ -217,12 +192,12 @@ namespace GLGraphLib
             int row = 8;
 
             // 4 Channel Test
-            for ( int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j <= row; j++)
                 {
                     component.SetChannelValue(CH_X, i, j, j * 0.5 - 2);
-                    component.SetChannelValue(CH_Y, i, j, 2 - i * 0.5 );
+                    component.SetChannelValue(CH_Y, i, j, 2 - i * 0.5);
                 }
             }
         }
@@ -248,9 +223,9 @@ namespace GLGraphLib
 
             var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
 
-            for ( int i = 0; i < ConstellationComponent.MaxChannel; i++)
+            for (int i = 0; i < ConstellationComponent.MaxChannel; i++)
             {
-                for ( int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
+                for (int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
                 {
                     // 설정한 Index 범위를 벗어날 때
                     if (i >= CH_X.GetLength(0) || j >= CH_X.GetLength(1))
@@ -263,13 +238,13 @@ namespace GLGraphLib
                         break;
                     }
 
-                    if ( CH_X[i, j] != 0 && CH_Y[i, j] != 0)
+                    if (CH_X[i, j] != 0 && CH_Y[i, j] != 0)
                     {
                         //float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
                         //float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * (CurrentControlHeight - yScaledPadding * 2)) + yScaledPadding;
-                        float x = (float)((CH_X[i, j] - MinX) / (MaxX- MinX) * ScreenStandard) + PaddingHorizontal;
-                        float y = (float)((CH_Y[i, j] -MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
-                        
+                        float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
+                        float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+
                         #region Min/Max 처리
                         // Min/Max 처리
                         if (CH_X[i, j] < MinX) x = PaddingHorizontal;
@@ -365,7 +340,7 @@ namespace GLGraphLib
                         gl.Vertex(xPosition + rectangleX, yPosition - (rectangleY - rectangleX), 0.0f);
                         gl.End();
 
-                        DrawText(gl, strContent, xPosition + rectangleY + 10, yPosition - 8, 10);
+                        GLUtil.DrawText(gl, strContent, xPosition + rectangleY + 10, yPosition - 8, AxisColor, 10);
 
                         xPosition += (strContent.Length * 10);
 
