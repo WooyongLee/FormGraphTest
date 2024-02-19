@@ -18,9 +18,7 @@ namespace GLGraphLib
         {
             InitializeComponent();
 
-            CH_X = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
-            CH_Y = new double[ConstellationComponent.MaxChannel, ConstellationComponent.MaxConstellationData];
-            component = new ConstellationComponent(CH_X, CH_Y);
+            this.component = new ConstellationComponent();
 
             this.SizeChanged += ConstellationChart_SizeChanged;
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
@@ -180,40 +178,9 @@ namespace GLGraphLib
             gl.DrawText((int)x, (int)y, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, size, strValue);
         }
 
-        // Create Sample Data
-        public void MakeDataForTest()
-        {
-            Random random = new Random();
-            Random random2 = new Random();
-
-            component.SetChannelValue(CH_X, 0, 0, 0.0);
-            component.SetChannelValue(CH_Y, 0, 0, 0.0);
-
-            int row = 8;
-
-            // 4 Channel Test
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j <= row; j++)
-                {
-                    component.SetChannelValue(CH_X, i, j, j * 0.5 - 2);
-                    component.SetChannelValue(CH_Y, i, j, 2 - i * 0.5);
-                }
-            }
-        }
-
         // Component를 통하여 데이터를 도시
         private void DrawData(OpenGL gl)
         {
-            // 임의로 샘플 데이터 도시
-            if (IsLoadSample)
-            {
-                // MakeDataForTest();
-            }
-
-            var xLength = CH_X.Length;
-            var yLength = CH_Y.Length;
-
             var yScaledPadding = IsShowLegend ? PaddingVertical + Legend_Offset : PaddingVertical;
 
             var scaledHeight = IsShowLegend ? CurrentControlHeight - Legend_Offset : CurrentControlHeight;
@@ -223,45 +190,82 @@ namespace GLGraphLib
 
             var ScreenStandard = Math.Min(ScreenMaxX, ScreenMaxY);
 
-            for (int i = 0; i < ConstellationComponent.MaxChannel; i++)
+            #region old
+            // old
+            //var xLength = CH_X.Length;
+            //var yLength = CH_Y.Length;
+            //for (int i = 0; i < ConstellationComponent.MaxChannel; i++)
+            //{
+            //    for (int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
+            //    {
+            //        // 설정한 Index 범위를 벗어날 때
+            //        if (i >= CH_X.GetLength(0) || j >= CH_X.GetLength(1))
+            //        {
+            //            break;
+            //        }
+
+            //        if (i >= CH_Y.GetLength(0) || j >= CH_Y.GetLength(1))
+            //        {
+            //            break;
+            //        }
+
+            //        if (CH_X[i, j] != 0 && CH_Y[i, j] != 0)
+            //        {
+            //            //float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
+            //            //float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * (CurrentControlHeight - yScaledPadding * 2)) + yScaledPadding;
+            //            float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
+            //            float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+
+            //            #region Min/Max 처리
+            //            // Min/Max 처리
+            //            if (CH_X[i, j] < MinX) x = PaddingHorizontal;
+            //            if (CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
+            //            if (CH_Y[i, j] < MinY) y = yScaledPadding;
+            //            if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - yScaledPadding;
+            //            #endregion
+
+            //            // gl.Color(1.0f, 1.0f, 0.0f); // yellow
+            //            gl.Color(component.GetNormalizedR(i), component.GetNormalizedG(i), component.GetNormalizedB(i));
+            //            gl.PointSize(5.0f);
+            //            gl.Begin(OpenGL.GL_POINTS);
+            //            gl.Vertex(x, y, 0.0f);
+            //            gl.End();
+            //        } // end if : Check X, Y Null Value
+            //    } // end for : j (Constellation Data)
+            //} // end for : i (Channel)
+            #endregion
+
+            // new 
+            if (Data != null)
             {
-                for (int j = 0; j < ConstellationComponent.MaxConstellationData; j++)
+                int channels = Data.GetLength();
+                for (int i = 0; i < channels; i++)
                 {
-                    // 설정한 Index 범위를 벗어날 때
-                    if (i >= CH_X.GetLength(0) || j >= CH_X.GetLength(1))
+                    int countOfData = Data.GetChannelX(i).Count;
+                    for (int j = 0; j < countOfData; j++)
                     {
-                        break;
-                    }
+                        var chX = Data.GetChannelX(i)[j];
+                        var chY = Data.GetChannelY(i)[j];
 
-                    if (i >= CH_Y.GetLength(0) || j >= CH_Y.GetLength(1))
-                    {
-                        break;
-                    }
-
-                    if (CH_X[i, j] != 0 && CH_Y[i, j] != 0)
-                    {
-                        //float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * (CurrentControlWidth - PaddingHorizontal * 2)) + PaddingHorizontal;
-                        //float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * (CurrentControlHeight - yScaledPadding * 2)) + yScaledPadding;
-                        float x = (float)((CH_X[i, j] - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
-                        float y = (float)((CH_Y[i, j] - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
+                        float x = (float)((chX - MinX) / (MaxX - MinX) * ScreenStandard) + PaddingHorizontal;
+                        float y = (float)((chY - MinY) / (MaxY - MinY) * ScreenStandard) + yScaledPadding;
 
                         #region Min/Max 처리
                         // Min/Max 처리
-                        if (CH_X[i, j] < MinX) x = PaddingHorizontal;
-                        if (CH_X[i, j] > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
-                        if (CH_Y[i, j] < MinY) y = yScaledPadding;
-                        if (CH_Y[i, j] > MaxY) y = (float)CurrentControlHeight - yScaledPadding;
+                        if (chX < MinX) x = PaddingHorizontal;
+                        if (chX > MaxX) x = (float)CurrentControlWidth - PaddingHorizontal;
+                        if (chY < MinY) y = yScaledPadding;
+                        if (chY > MaxY) y = (float)CurrentControlHeight - yScaledPadding;
                         #endregion
 
-                        // gl.Color(1.0f, 1.0f, 0.0f); // yellow
                         gl.Color(component.GetNormalizedR(i), component.GetNormalizedG(i), component.GetNormalizedB(i));
                         gl.PointSize(5.0f);
                         gl.Begin(OpenGL.GL_POINTS);
                         gl.Vertex(x, y, 0.0f);
                         gl.End();
-                    } // end if : Check X, Y Null Value
-                } // end for : j (Constellation Data)
-            } // end for : i (Channel)
+                    } // end for (int j = 0; j < countOfData; j++)
+                } // end for (int i = 0; i < channels; i++)
+            } // end if (Data != null)
         }
 
         private void OpenGLControl_OpenGLDraw(object sender, OpenGLRoutedEventArgs args)

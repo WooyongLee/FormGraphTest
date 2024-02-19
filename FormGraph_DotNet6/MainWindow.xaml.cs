@@ -1,7 +1,5 @@
 ﻿using FormGraphLib_DotNet6;
-using GLGraphLib;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -91,7 +89,7 @@ namespace FormGraph_DotNet6
         private void MakeSampleButton_Click(object sender, RoutedEventArgs e)
         {
             isTwoState = !isTwoState;
-           
+
             //double[] data = new double[SpectrumChartControl.TotalDataLength];
 
             //int totalLength = SpectrumChartControl.TotalDataLength - 50;
@@ -183,7 +181,7 @@ namespace FormGraph_DotNet6
                     else if (btnContent.Contains("Constellation"))
                     {
                         // ConstellationChartControl.Visibility = Visibility.Visible;
-                        ConstellationChartWindow windows= new ConstellationChartWindow();
+                        ConstellationChartWindow windows = new ConstellationChartWindow();
                         windows.Show();
                     }
 

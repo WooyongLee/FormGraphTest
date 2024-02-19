@@ -36,23 +36,17 @@ namespace FormGraph_DotNet6
 
             this.ConstellationChartControl.IsLoadSample = true;
 
-            Random random = new Random();
-            Random random2 = new Random();
-
-            // 원점
-            this.ConstellationChartControl.CH_X[0, 0] = 0.0;
-            this.ConstellationChartControl.CH_Y[0, 0] = 0.0;
-
             // 각 x, y 축의 만나는 부분의 점
             int row = 8;
 
+            this.ConstellationChartControl.Data = new GLGraphLib_DotNet6.ConstellationData(8);
+            
             // 4 Channel Test
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j <= row; j++)
                 {
-                    this.ConstellationChartControl.CH_X[i, j] = j * 0.5 - 2;
-                    this.ConstellationChartControl.CH_Y[i, j] = 2 - i * 0.5;
+                    this.ConstellationChartControl.Data.Add(i, j * 0.5 - 2, 2 - i * 0.5);
                 }
             }
         }

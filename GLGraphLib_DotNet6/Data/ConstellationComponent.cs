@@ -35,6 +35,10 @@ namespace GLGraphLib
             Color.FromArgb(255,129,199,132), Color.FromArgb(255,192,202,51), Color.FromArgb(255,244,67,54), Color.FromArgb(255,46,134,193),
             Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193),Color.FromArgb(255,46,134,193), Color.Red};
 
+        public ConstellationComponent()
+        {
+        }
+
         public ConstellationComponent(double[,] CH_X, double[,] CH_Y)
         {
             // Constellation Data에 기본값 세팅

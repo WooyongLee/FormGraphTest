@@ -57,10 +57,6 @@ namespace FormGraph_DotNet6
                 double randValue = random.NextDouble() * (this.BarGraphChartControl.MaxY - this.BarGraphChartControl.MinY) + this.BarGraphChartControl.MinY;
 
                 this.BarGraphChartControl.BarData.Add(randValue);
-            }
-
-            for (int i = 0; i < barCount; i++)
-            {
                 this.BarGraphChartControl.BarLegend.Add((i + 1).ToString());
             }
         }

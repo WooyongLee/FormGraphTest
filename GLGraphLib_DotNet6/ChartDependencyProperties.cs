@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GLGraphLib_DotNet6;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows;
@@ -13,22 +14,10 @@ namespace GLGraphLib
     public partial class ConstellationChart
     {
         #region Properties
-        /// <summary>
-        /// x 좌표 값
-        /// </summary>
-        public double[,] CH_X
+        public ConstellationData Data
         {
-            get { return (double[,])GetValue(CH_X_Property); }
-            set { SetValue(CH_X_Property, value); }
-        }
-
-        /// <summary>
-        /// y 좌표 값
-        /// </summary>
-        public double[,] CH_Y
-        {
-            get { return (double[,])GetValue(CH_Y_Property); }
-            set { SetValue(CH_Y_Property, value); }
+            get { return (ConstellationData)GetValue(ConstellationDataProperty); }
+            set { SetValue(ConstellationDataProperty, value); }
         }
 
         public bool IsShowLegend
@@ -52,15 +41,9 @@ namespace GLGraphLib
         #endregion
 
         #region Define DependencyProperty from Properties
-        public static readonly DependencyProperty CH_X_Property = DependencyProperty.Register(
-            "CH_X",
-            typeof(double[,]),
-            typeof(ConstellationChart),
-            null
-        );
-        public static readonly DependencyProperty CH_Y_Property = DependencyProperty.Register(
-            "CH_Y",
-            typeof(double[,]),
+        public static readonly DependencyProperty ConstellationDataProperty = DependencyProperty.Register(
+            "Data",
+            typeof(ConstellationData),
             typeof(ConstellationChart),
             null
         );
