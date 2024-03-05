@@ -9,8 +9,7 @@ namespace GLGraphLib
     {
         public static readonly int MaxTraceCount = 4;
 
-
-        // 4개의 Trace의 데이터를 표현
+        // 최대 4개의 Trace의 데이터를 표현
         private List<double>[] data;
 
         public Trace(int totalDataLength)
@@ -41,9 +40,45 @@ namespace GLGraphLib
             }
         }
 
+        public void SetData(int index, List<double> values)
+        {
+            if (data[index] == null)
+            {
+                data[index] = new List<double>();
+            }
+
+            // Copy to values at parameter index
+            // data[index] = values.ToList();
+            int length = data[index].Count;
+            if (length < values.Count)
+            {
+                int originLength = length;
+                length = values.Count;
+                for (int i = originLength; i < length; i++)
+                {
+                    data[index].Add(0.0);
+                }
+            }
+            else
+            {
+                // 초기화 후 재배열
+                data[index].Clear();
+                length = values.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    data[index].Add(0.0);
+                }
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                data[index][i] = values[i];
+            }
+        }
+
         public bool ClearData(int index) 
         {
-            data[index] = null;
+            data[index].Clear();
             return true;
         }
 

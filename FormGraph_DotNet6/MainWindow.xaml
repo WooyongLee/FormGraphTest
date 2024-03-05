@@ -6,7 +6,7 @@
         xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1200" Width="1200" Loaded="Window_Loaded">
+        Title="MainWindow" Height="600" Width="900" Loaded="Window_Loaded">
     <Grid>
         <StackPanel Orientation="Vertical">
             <Grid>
@@ -15,9 +15,9 @@
                     <Button x:Name="ConstellationButton" Content="Constellation"   Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
                     <Button x:Name="BarButton" Content="Bar" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
 
-                    <ComboBox Width="100" Panel.ZIndex="3" IsHitTestVisible="True" Margin="5, 1">
-                        <ComboBoxItem Content="aaa"></ComboBoxItem>
-                        <ComboBoxItem Content="bbb"></ComboBoxItem>
+                    <ComboBox Width="100" Panel.ZIndex="3" IsHitTestVisible="True" Margin="5, 1" SelectedIndex="0">
+                        <ComboBoxItem Content="Spectrum" Selected="ComboBoxItem_Selected"></ComboBoxItem>
+                        <ComboBoxItem Content="I/Q" Selected="ComboBoxItem_Selected"></ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
             </Grid>
@@ -68,6 +68,13 @@
                         <TextBox x:Name="MaxYTextBox" Width="50"></TextBox>
                         <Button x:Name="SetMinXYButton" Margin="5, 0" Content=" Set Min X, Y " Click="SetMinXYButton_Click"></Button>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0, 3, 0, 3">
+                        <TextBlock Margin="5, 0, 5, 0">Center Freq :</TextBlock>
+                        <TextBox x:Name="CenterFreqTextBox" Width="50"></TextBox>
+                        <TextBlock Margin="5, 0, 5, 0">Span :</TextBlock>
+                        <TextBox x:Name="SpanTextBox" Width="50"></TextBox>
+                        <Button x:Name="SetFreqButton" Margin="5, 0" Content=" Set Min X, Y " Click="SetFreqButton_Click"></Button>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
             <Grid Panel.ZIndex="2">
@@ -84,8 +91,8 @@
                 <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="1001"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
                                        CenterFrequency="3650.01" Span="150"
-                                       IsShowXaxisText="True"
-                                       RefLevel="-20" DivScale="10" >       
+                                       IsShowXaxisText="True" ChartMode="DefaultSpecturm"
+                                       RefLevel="-20" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True">       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>

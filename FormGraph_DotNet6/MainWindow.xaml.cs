@@ -1,5 +1,7 @@
 ﻿using FormGraphLib_DotNet6;
+using GLGraphLib;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,6 +18,8 @@ namespace FormGraph_DotNet6
         {
             InitializeComponent();
 
+            this.SizeChanged += MainWindow_SizeChanged;
+
             GraphComponent.MaxWidth = 800;
             GraphComponent.MaxHeight = 400;
 
@@ -23,6 +27,15 @@ namespace FormGraph_DotNet6
             MaxXTextBox.Text = (SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2).ToString();
             MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
             MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
+        }
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var chartWidth = this.ActualWidth * 4.0 / 5.0;
+            var chartHeight = this.ActualHeight * 2.0 / 3.0;
+
+            this.SpectrumChartControl.Width = chartWidth;
+            this.SpectrumChartControl.Height = chartHeight;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -42,7 +55,7 @@ namespace FormGraph_DotNet6
             {
                 var traceNum = ExtractNumber(btn.Name);
 
-                SpectrumChartControl.ShowHideTrace(traceNum - 1);
+                SpectrumChartControl.IsVisibleSpectrum[traceNum - 1] = !SpectrumChartControl.IsVisibleSpectrum[traceNum - 1];
             }
         }
 
@@ -54,6 +67,8 @@ namespace FormGraph_DotNet6
                 var markerNum = ExtractNumber(btn.Name);
 
                 SpectrumChartControl.ShowHideMarker(markerNum - 1);
+
+                SpectrumChartControl.targetTraceIndex = 0;
             }
         }
 
@@ -90,64 +105,79 @@ namespace FormGraph_DotNet6
         {
             isTwoState = !isTwoState;
 
-            //double[] data = new double[SpectrumChartControl.TotalDataLength];
-
-            //int totalLength = SpectrumChartControl.TotalDataLength - 50;
-            //if (isTwoState)
-            //{
-            //    for ( int i = 0; i < totalLength; i++)
-            //    {
-            //        data[i] = -100 + 0.1 * i;
-            //    }
-            //}
-            //else
-            //{
-            //    for (int i = 0; i < totalLength; i++)
-            //    {
-            //        data[i] = -0.1 * i;
-            //    }
-            //}
-
-            //for ( int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
-            //{
-            //    if (i % 2 == 0) data[i] = 0 + 0.1 * i;
-            //    else data[i] = -100 - 0.1 * i;
-            //}
-
-            var data = SpectrumChartControl.SpectrumData;
-
-
-            int totalLength = SpectrumChartControl.TotalDataLength - 50;
-            if (isTwoState)
+            if (SpectrumChartControl.ChartMode == ESpectrumChartMode.IQ)
             {
-                for (int i = 0; i < totalLength; i++)
+                // 항상 2개 Specturm Visible
+                SpectrumChartControl.IsVisibleSpectrum[0] = true;
+                SpectrumChartControl.IsVisibleSpectrum[1] = true;
+
+                SpectrumChartControl.MinX = 0;
+                SpectrumChartControl.MaxX = 1001;
+                SpectrumChartControl.MinY = -33000;
+                SpectrumChartControl.MaxY = +33000;
+
+                int totalLength = SpectrumChartControl.TotalDataLength;
+                int scale = 20000;
+                var data = new List<double>();
+                var data2 = new List<double>();
+                if (isTwoState)
                 {
-                    data[0, i] = -100 + 0.1 * i;
+                    for (int i = 0; i < totalLength; i++)
+                    {
+                        double angle = -90 + 1 * i; // -90에서 90까지의 각도 (90도 틀어진 값)
+                        double radians = angle * Math.PI / 180; // 라디안 값으로 변환
+                        data.Add(scale * Math.Cos(radians)); // 코사인 값 추가
+                        data2.Add(scale * Math.Sin(radians)); // 사인 값 추가
+                    }
                 }
+                else
+                {
+                    for (int i = 0; i < totalLength; i++)
+                    {
+                        double angle = -90 + 1 * i; // -90에서 90까지의 각도 (90도 틀어진 값)
+                        double radians = angle * Math.PI / 180; // 라디안 값으로 변환
+                        data.Add(scale * Math.Sin(radians)); // 사인 값 추가
+                        data2.Add(scale * Math.Cos(radians)); // 코사인 값 추가
+                    }
+                }
+                SpectrumChartControl.TraceData.SetData(0, data);
+                SpectrumChartControl.TraceData.SetData(1, data2);
             }
+
+            // Spectrum
             else
             {
-                for (int i = 0; i < totalLength; i++)
+                int totalLength = SpectrumChartControl.TotalDataLength - 50;
+                var data = new List<double>();
+                var data2 = new List<double>();
+                if (isTwoState)
                 {
-                    data[0, i] = -0.1 * i;
+                    for (int i = 0; i < totalLength; i++)
+                    {
+                        data.Add(-100 + 0.1 * i);
+                        data2.Add(-0.1 * i);
+                    }
                 }
+                else
+                {
+                    for (int i = 0; i < totalLength; i++)
+                    {
+                        data.Add(-0.1 * i);
+                    }
+                }
+
+                for (int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
+                {
+                    if (i % 2 == 0) data.Add(0 + 0.1 * i);
+                    else data.Add(-100 - 0.1 * i);
+
+                    data2.Add(-0.1 * i);
+                }
+
+                SpectrumChartControl.TraceData.SetData(0, data);
+                SpectrumChartControl.TraceData.SetData(1, data2);
+                SpectrumChartControl.IsVisibleSpectrum[0] = true;
             }
-
-            for (int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
-            {
-                if (i % 2 == 0) data[0, i] = 0 + 0.1 * i;
-                else data[0, i] = -100 - 0.1 * i;
-            }
-
-            SpectrumChartControl.IsVisibleSpectrum[0] = true;
-            // SpectrumChartControl.MakeTrace(0);
-
-            //ConstellationChartControl.CH_X = new double[1, 8];
-            //ConstellationChartControl.CH_Y = new double[1, 8];
-
-            //ConstellationChartControl.CH_X[0, 0] = 0.1;
-            //ConstellationChartControl.CH_Y[0, 0] = 0.1;
-
         }
 
         private void SetMinXYButton_Click(object sender, RoutedEventArgs e)
@@ -193,6 +223,36 @@ namespace FormGraph_DotNet6
                     }
                 }));
             }
+        }
+
+        bool isInit = false;
+        private void ComboBoxItem_Selected(object sender, RoutedEventArgs e)
+        {
+            if (!isInit)
+            {
+                isInit = true;
+                return;
+            }
+            ComboBoxItem? item = sender as ComboBoxItem;
+            if (item != null)
+            {
+                if (item.Content.ToString().ToLower().Contains("spectrum"))
+                {
+                    SpectrumChartControl.ChartMode = ESpectrumChartMode.DefaultSpecturm;
+                }
+
+                // I/Q View
+                else
+                {
+                    SpectrumChartControl.ChartMode = ESpectrumChartMode.IQ;
+                }
+            }
+        }
+
+        private void SetFreqButton_Click(object sender, RoutedEventArgs e)
+        {
+            SpectrumChartControl.CenterFrequency = double.Parse(CenterFreqTextBox.Text); 
+            SpectrumChartControl.Span = double.Parse(SpanTextBox.Text); 
         }
     }
 }

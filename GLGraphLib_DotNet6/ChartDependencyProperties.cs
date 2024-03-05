@@ -32,12 +32,6 @@ namespace GLGraphLib
             set { SetValue(StrLegendProperty, value); }
         }
 
-        //public double[,,] ConstellationData
-        //{
-        //    get { return (double[,,])GetValue(ConstellationDataProperty); }
-        //    set { SetValue(ConstellationDataProperty, value); }
-        //}
-
         #endregion
 
         #region Define DependencyProperty from Properties
@@ -108,39 +102,10 @@ namespace GLGraphLib
     public partial class SpectrumChart
     {
         #region Properties
-        public double[, ] SpectrumData
+        public Trace TraceData
         {
-            get { return (double[, ])GetValue(SpectrumDataProperty); }
-            set {
-                // Data 변경을 확인한 후, 
-                bool IsSpectrumDataChanged(double[,] newValue)
-                {
-                    if (this.SpectrumData == null && newValue == null)
-                        return false;
-
-                    if (this.SpectrumData == null || newValue == null)
-                        return true;
-
-                    if (this.SpectrumData.GetLength(0) != newValue.GetLength(0) || this.SpectrumData.GetLength(1) != newValue.GetLength(1))
-                        return true;
-
-                    for (int i = 0; i < this.SpectrumData.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < this.SpectrumData.GetLength(1); j++)
-                        {
-                            // 둘 중 하나라도 같은게 있으면 변경
-                            if (this.SpectrumData[i, j] != newValue[i, j])
-                                return true;
-                        }
-                    }
-                    return false;
-                }
-
-                if ( IsSpectrumDataChanged(value))
-                {
-                    SetValue(SpectrumDataProperty, value);
-                }
-            }
+            get { return (Trace)GetValue(TraceDataProperty); }
+            set { SetValue(TraceDataProperty, value); }
         }
 
         public bool[] IsVisibleSpectrum
@@ -191,6 +156,12 @@ namespace GLGraphLib
             set { SetValue(DivScaleProperty, value); }
         }
 
+        public IList<RGBcolor> TraceColors
+        {
+            get { return (IList<RGBcolor>)GetValue(TraceColorsProperty); } 
+            set { SetValue(TraceColorsProperty, value); }
+        }
+
         // To Do :: Color 관련하여 Dependency Object 추가하기
         RGBcolor spectrumColor1 = new RGBcolor(Color.Yellow); // trace 1
         RGBcolor spectrumColor2 = new RGBcolor(Color.Pink); // trace 2
@@ -205,12 +176,24 @@ namespace GLGraphLib
             get { return (bool)GetValue(IsShowXaxisTextProperty); }
             set { SetValue(IsShowXaxisTextProperty, value); }
         }
+
+        public bool IsShowMarkerInfo
+        {
+            get { return (bool)GetValue(IsShowMarkerInfoProperty); }
+            set { SetValue(IsShowMarkerInfoProperty, value);}
+        }
+
+        public ESpectrumChartMode ChartMode
+        {
+            get { return (ESpectrumChartMode)GetValue(ChartModeProperty); }
+            set { SetValue(ChartModeProperty, value);}
+        }
         #endregion
 
         #region Define DependencyProperty from Properties
-        public static readonly DependencyProperty SpectrumDataProperty = DependencyProperty.Register(
-            "SpectrumData",
-            typeof(double[, ]),
+        public static readonly DependencyProperty TraceDataProperty = DependencyProperty.Register(
+            "TraceData",
+            typeof(Trace),
             typeof(SpectrumChart),
             null
             );
@@ -233,14 +216,14 @@ namespace GLGraphLib
             "CenterFrequency",
             typeof(double),
             typeof(SpectrumChart),
-            null
+            new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnFreqChanged))
             );
 
         public static readonly DependencyProperty SpanProperty = DependencyProperty.Register(
             "Span",
             typeof(double),
             typeof(SpectrumChart),
-            null
+            new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnSpanChanged))
             );
 
         public static readonly DependencyProperty RefLevelProperty = DependencyProperty.Register(
@@ -263,7 +246,76 @@ namespace GLGraphLib
             typeof(SpectrumChart),
             null
             );
+
+        public static readonly DependencyProperty TraceColorsProperty = DependencyProperty.Register(
+            "TraceColors",
+            typeof(IList<RGBcolor>),
+            typeof(SpectrumChart),
+            null
+            );
+        public static readonly DependencyProperty IsShowMarkerInfoProperty = DependencyProperty.Register(
+            "IsShowMarkerInfo",
+            typeof(bool),
+            typeof(SpectrumChart),
+            null
+            );
+        public static readonly DependencyProperty ChartModeProperty = DependencyProperty.Register(
+            "ChartMode",
+            typeof(ESpectrumChartMode),
+            typeof(SpectrumChart),
+            new FrameworkPropertyMetadata(ESpectrumChartMode.DefaultSpecturm, new PropertyChangedCallback(OnChartModeChanged))
+            );
         #endregion
+
+        private static void OnChartModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var spectrumChartControl = d as SpectrumChart;
+            ESpectrumChartMode newChartMode = (ESpectrumChartMode)e.NewValue;
+
+            if (spectrumChartControl != null )
+            {
+                if (newChartMode == ESpectrumChartMode.IQ)
+                {
+                    spectrumChartControl.IsShowXaxisText = false;
+                }
+                else
+                {
+                    spectrumChartControl.IsShowXaxisText = true;
+                }
+            }
+        }
+
+        private static void OnFreqChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var spectrumChartControl = d as SpectrumChart;
+
+            // New Center Freq Value
+            double newValue = (double)e.NewValue;
+
+            if (spectrumChartControl != null )
+            {
+                spectrumChartControl.CenterFrequency = newValue;
+
+                spectrumChartControl.MinX = spectrumChartControl.CenterFrequency - spectrumChartControl.Span / 2.0;
+                spectrumChartControl.MaxX = spectrumChartControl.CenterFrequency + spectrumChartControl.Span / 2.0;
+            }
+        }
+
+        private static void OnSpanChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var spectrumChartControl = d as SpectrumChart;
+
+            // New Span Value
+            double newValue = (double)e.NewValue;
+
+            if (spectrumChartControl != null)
+            {
+                spectrumChartControl.Span = newValue;
+
+                spectrumChartControl.MinX = spectrumChartControl.CenterFrequency - spectrumChartControl.Span / 2.0;
+                spectrumChartControl.MaxX = spectrumChartControl.CenterFrequency + spectrumChartControl.Span / 2.0;
+            }
+        }
 
         override public void InitProperty()
         {
@@ -313,14 +365,23 @@ namespace GLGraphLib
             this.TotalDataLength = 1001;
 
             IsVisibleSpectrum = new bool[Trace.MaxTraceCount];
-            SpectrumData = new double[Trace.MaxTraceCount, this.TotalDataLength];
 
             IsVisibleSpectrum[0] = true; // 첫 trace는 Visible
         }
 
         public override void UpdateTheme()
         {
+            if (this.BackgroundTheme == ETheme.Black)
+            {
+                BackgroundColor = new RGBcolor(Color.Black);
+                AxisColor = new RGBcolor(Color.White);
+            }
 
+            else if (this.BackgroundTheme == ETheme.White)
+            {
+                BackgroundColor = new RGBcolor(Color.White);
+                AxisColor = new RGBcolor(Color.Black);
+            }
         }
     }
 

@@ -2,9 +2,12 @@
 using SharpGL.Enumerations;
 using SharpGL.WPF;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Threading;
-using System.Windows.Controls;
+using System.Windows;
+using System.Windows.Documents;
 
 namespace GLGraphLib
 {
@@ -32,10 +35,7 @@ namespace GLGraphLib
         bool isDragOn = false;
 
         // Specrum Screen 상에서의 x-y Pair Dictionary
-        ScreenPositions screenPositions;
-
-        // Trace 객체
-        Trace trace;
+        ScreenPositions[] screenPositions;
 
         // Marker 객체
         Marker marker;
@@ -43,15 +43,13 @@ namespace GLGraphLib
         // Color 설정
         RGBcolor markerColor = new RGBcolor(Color.Red);
         RGBcolor markerHighlightColor = new RGBcolor(Color.Orange);
-        RGBcolor[] spectrumColors;
-
-        ESpectrumChartMode mode;
 
         #region public
         public bool IsSetMinMax = false;
 
-        #endregion
+        public int targetTraceIndex = 0;
 
+        #endregion
 
         public SpectrumChart()
         {
@@ -59,12 +57,14 @@ namespace GLGraphLib
 
             // 기본 Total Length 설정
             TotalDataLength = 1001;
-            screenPositions = new ScreenPositions(TotalDataLength);
-
-            SpectrumData = new double[Trace.MaxTraceCount, TotalDataLength];
+            screenPositions = new ScreenPositions[Trace.MaxTraceCount]; 
+            for (int i = 0; i < Trace.MaxTraceCount; i++)
+            {
+                screenPositions[i] = new ScreenPositions(TotalDataLength);
+            }
 
             marker = new Marker();
-            trace = new Trace(TotalDataLength);
+            TraceData = new Trace(TotalDataLength);
 
             specCheckTimer = new Timer(TimerCallBack);
             specCheckTimer.Change(4999, 999); // 1초 1회
@@ -73,7 +73,7 @@ namespace GLGraphLib
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
             this.openGLControl.Resized += OpenGLControl_Resized;
 
-            spectrumColors = new RGBcolor[4] { spectrumColor1, spectrumColor2, spectrumColor3, spectrumColor4 };
+            TraceColors = new RGBcolor[4] { spectrumColor1, spectrumColor2, spectrumColor3, spectrumColor4 };
 
             // Dependency Property Set Owner
             IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
@@ -82,13 +82,13 @@ namespace GLGraphLib
 
             for (int i = 0; i < Trace.MaxTraceCount; i++)
             {
-                trace.SetData(SpectrumData, i, TotalDataLength);
+                TraceData.SetData(i, new List<double>());
             }
         }
 
         private void TimerCallBack(object? state)
         {
-            Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
+            // Console.WriteLine(string.Format("{0} seconds, iter = {1}, gap = {2}", ++second, iter, iter - prevIter));
             prevIter = iter;
         }
 
@@ -112,7 +112,7 @@ namespace GLGraphLib
             // 초기 값 적용
             if (iter == 0)
             {
-                 // InitProperty();
+                // InitProperty();
             }
 
             // Min, Max 값 적용
@@ -200,13 +200,12 @@ namespace GLGraphLib
             int fontsizeX = fontsize - 1;
 
             // define text margin
-            int MarginX = (int)(PaddingHorizontal * (4.0 / 5.0));
-            int MarginY = (int)(PaddingVertical * (4.0 / 7.0));
-            //int TopOffset = (int)(MarginY * (2.0 / 3.0));
-            //int LeftfOffset = (int)(MarginX * (2.0 / 3.0));
-            int xOffset = 5;
             int xAxisXoffset = 10;
             int yAxisYOffset = 10;
+
+            int MarginX = (int)(PaddingHorizontal * (4.0 / 5.0));
+            int MarginY = (int)(PaddingVertical * (4.0 / 7.0));
+            int xOffset = 5;
 
             var ScreenMinX = PaddingHorizontal - MarginX - xOffset;
             var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal * 2 + xOffset;
@@ -235,7 +234,7 @@ namespace GLGraphLib
                 GLUtil.DrawFormattedText(gl, valueX, (int)screenX, (int)ScreenMinY, AxisColor, 5, fontsizeX);
 
                 // 단위 도시 (x)
-                gl.DrawText((int)ScreenMaxX + xAxisXoffset * 3, (int)ScreenMinY, spectrumColor1.R, spectrumColor1.G, spectrumColor1.B, GLUtil.FONT, fontsizeX, "(MHz)");
+                gl.DrawText((int)ScreenMaxX + xAxisXoffset * 3, (int)ScreenMinY, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, fontsizeX, "(MHz)");
             } // end if (IsShowXaxisText)
 
             // Column
@@ -247,19 +246,28 @@ namespace GLGraphLib
 
                 GLUtil.DrawFormattedText(gl, valueY, (int)ScreenMinX, (int)screenY, AxisColor, 2, fontsize);
             }
+            
+            // Marker Info 도시
+            if (IsShowMarkerInfo) { DrawMarkerInfo(gl, fontsizeX); }
 
+            // 범례 도시 (IQ)
+            if (ChartMode == ESpectrumChartMode.IQ) { DrawComment(gl); }
+            
             // 단위 도시 (y)
-            gl.DrawText((int)ScreenMinX, (int)ScreenMaxY + yAxisYOffset * 3, spectrumColor1.R, spectrumColor1.G, spectrumColor1.B, GLUtil.FONT, fontsize, "(dBm)");
+            else
+            {
+                gl.DrawText((int)ScreenMinX, (int)ScreenMaxY + yAxisYOffset * 3, AxisColor.R, AxisColor.G, AxisColor.B, GLUtil.FONT, fontsize, "(dBm)");
+            }
         }
 
         // Bounding Box를 도시함
         private void DrawBoundingObject(OpenGL gl)
         {
             // 디버깅 쉽게 하기 위한 모드 변경
-            mode = ESpectrumChartMode.DefaultSpecturm;
+            // ChartMode = ESpectrumChartMode.DefaultSpecturm;
 
             // 반투명 Bounding Box를 Center 기준으로 Occupied BW 만큼 도시함
-            if (mode == ESpectrumChartMode.ChannelPower)
+            if (ChartMode == ESpectrumChartMode.ChannelPower)
             {
                 // To Do :: Occupied bandwidth에 따라 Center로 부터 양 옆으로 주파수 간격 설정 필요
                 // 일단 Screen Width와 관계 없이 임의로 설정
@@ -300,7 +308,7 @@ namespace GLGraphLib
             }
 
             // 전체를 다섯 칸으로 나누고(Carrier Box), 가장 center 칸 제외하고 absolute limit line과 relative limit line을 도시함
-            else if (mode == ESpectrumChartMode.ACLR)
+            else if (ChartMode == ESpectrumChartMode.ACLR)
             {
                 // Set Blending for Transparency
                 gl.Enable(OpenGL.GL_BLEND);
@@ -356,7 +364,7 @@ namespace GLGraphLib
                 gl.Disable(OpenGL.GL_BLEND);
             }
 
-            else if (mode == ESpectrumChartMode.SEM)
+            else if (ChartMode == ESpectrumChartMode.SEM)
             {
 
             }
@@ -373,36 +381,35 @@ namespace GLGraphLib
                     continue;
                 }
 
-                this.MakeTrace(traceIndex);
-
                 // 해당 Index에 대한 Trace 데이터
-                var traceData = trace.GetData(traceIndex);
+                var data = TraceData.GetData(traceIndex);
 
-                if (traceData != null)
+                if (data != null)
                 {
                     if (IsLoadSample)
                     {
-                        trace.MakeSampleData(traceIndex, TotalDataLength);
+                        TraceData.MakeSampleData(traceIndex, TotalDataLength);
                     }
 
                     #region Use Line Strip
-                    var spectrumColor = spectrumColors[traceIndex];
+                    var spectrumColor = TraceColors[traceIndex];
 
                     // Draw Line from points
                     gl.Begin(OpenGL.GL_LINE_STRIP);
                     gl.Color(spectrumColor.R, spectrumColor.G, spectrumColor.B);
-                    for (int i = 0; i < TotalDataLength; i++)
+                    int dataLength = data.Count;
+                    for (int i = 0; i < dataLength; i++)
                     {
                         float currentX = SpectrumChartUtil.GetScreenX(i, TotalDataLength, CurrentControlWidth, PaddingHorizontal);
-                        float currentY = SpectrumChartUtil.GetScreenY(traceData[i], MinY, MaxY, CurrentControlHeight, PaddingVertical);
+                        float currentY = SpectrumChartUtil.GetScreenY(data[i], MinY, MaxY, CurrentControlHeight, PaddingVertical);
 
-                        screenPositions.Set(currentX, currentY, i);
+                        screenPositions[traceIndex].Set(currentX, currentY, i);
 
-                        // Renew All Markers
-                        for (int markerIndex = 0; markerIndex < Marker.MaxMarkerCount; markerIndex++)
-                        {
-                            marker.RenewPoint(currentX, currentY, markerIndex);
-                        }
+                        //// Renew All Markers
+                        //for (int markerIndex = 0; markerIndex < Marker.MaxMarkerCount; markerIndex++)
+                        //{
+                        //    marker.RenewPoint(currentX, currentY, markerIndex);
+                        //}
 
                         // Set Vertex from current x, y
                         gl.Vertex(currentX, currentY, 0);
@@ -416,65 +423,202 @@ namespace GLGraphLib
         // Marker를 도시함
         private void DrawMarker(OpenGL gl)
         {
-            // Marker를 생성
-            // 일단 Marker 하나만 그려보도록 함
-            for (int i = 0; i < Marker.MaxMarkerCount; i++)
+            // IQ인 경우 쌍으로 도시
+            if (ChartMode == ESpectrumChartMode.IQ)
             {
-                var markerPos = marker.GetPoints(i);
+                var markerPosI = marker.GetPoints(0);
+                var markerPosQ = marker.GetPoints(1);
 
-                if (markerPos != null)
+                if (markerPosI == null || markerPosQ == null)
                 {
-                    // Highlight Marker의 색 구분을 위한 분기
-                    var drawColor = markerColor;
-                    if (i == marker.SelectedMarkerIndex)
+                    return;
+                }
+
+                // Renew All Markers
+                int markerIndex = 0;
+                var xPos = markerPosI.X;
+                var yPosI = screenPositions[targetTraceIndex].GetClosestData(xPos, ref xPos);
+                var yPosQ = screenPositions[targetTraceIndex + 1].GetClosestData(xPos, ref xPos);
+                marker.RenewPoint(xPos, yPosI, markerIndex);
+                marker.RenewPoint(xPos, yPosQ, markerIndex + 1);
+
+                // I/Q에서는 단일 Marker로 Highlight Color 적용
+                var drawColor = markerHighlightColor;
+
+                // Draw Marker Line
+                gl.Begin(OpenGL.GL_LINE_STRIP);
+                gl.Color(drawColor.R, drawColor.G, drawColor.B);
+
+                gl.Vertex(xPos, CurrentControlHeight - PaddingVertical);
+                gl.Vertex(xPos, PaddingVertical);
+                gl.End();
+
+                // Draw Marker Triangle Twice (Trace I and Q)
+                gl.Begin(OpenGL.GL_TRIANGLES);
+                gl.Color(drawColor.R, drawColor.G, drawColor.B);
+
+                gl.Vertex(xPos, yPosI + markerOffsetY);
+                gl.Vertex(xPos + markerTriangleX, yPosI + markerTriangleY + markerOffsetY);
+                gl.Vertex(xPos - markerTriangleX, yPosI + markerTriangleY + markerOffsetY);
+                gl.End();
+
+                gl.Begin(OpenGL.GL_TRIANGLES);
+                gl.Color(drawColor.R, drawColor.G, drawColor.B);
+
+                gl.Vertex(xPos, yPosQ + markerOffsetY);
+                gl.Vertex(xPos + markerTriangleX, yPosQ + markerTriangleY + markerOffsetY);
+                gl.Vertex(xPos - markerTriangleX, yPosQ + markerTriangleY + markerOffsetY);
+                gl.End();
+            } // end if (ChartMode == ESpectrumChartMode.IQ)
+
+            else
+            {
+                // Marker를 생성
+                // 일단 Marker 하나만 그려보도록 함
+                for (int i = 0; i < Marker.MaxMarkerCount; i++)
+                {
+                    var markerPos = marker.GetPoints(i);
+
+                    if (markerPos != null)
                     {
-                        drawColor = markerHighlightColor;
-                    }
+                        // Renew All Markers
+                        int markerIndex = i;
+                        var xPos = markerPos.X;
+                        var yPos = screenPositions[targetTraceIndex].GetClosestData(xPos, ref xPos);
+                        marker.RenewPoint(xPos, yPos, markerIndex);
 
-                    // Draw Marker Line
-                    gl.Begin(OpenGL.GL_LINE_STRIP);
-                    gl.Color(drawColor.R, drawColor.G, drawColor.B);
-
-                    gl.Vertex(markerPos.X, CurrentControlHeight - PaddingVertical);
-                    gl.Vertex(markerPos.X, PaddingVertical);
-                    gl.End();
-
-                    // Draw Marker Triangle
-                    gl.Begin(OpenGL.GL_TRIANGLES);
-                    gl.Color(drawColor.R, drawColor.G, drawColor.B);
-
-                    gl.Vertex(markerPos.X, markerPos.Y + markerOffsetY);
-                    gl.Vertex(markerPos.X + markerTriangleX, markerPos.Y + markerTriangleY + markerOffsetY);
-                    gl.Vertex(markerPos.X - markerTriangleX, markerPos.Y + markerTriangleY + markerOffsetY);
-                    gl.End();
-
-                    int fontsize = SpectrumChartUtil.GetFontSize(iter);
-
-                    // Draw Marker Text
-                    string strMarkerText = string.Format("M {0}", i + 1);
-
-                    // Fixed Mark
-                    if (marker.IsFixed(i))
-                    {
-                        strMarkerText = "Fix " + strMarkerText;
-                    }
-
-                    // Delta Mark
-                    if (marker.IsDelta(i))
-                    {
-                        // Additional Target Index Mark
-                        var targetIndex = marker.GetDeltaTargetIndex(i) + 1;
-                        if (targetIndex != null)
+                        // Highlight Marker의 색 구분을 위한 분기
+                        var drawColor = markerColor;
+                        if (i == marker.SelectedMarkerIndex)
                         {
-                            strMarkerText += string.Format(" | {0}", targetIndex);
-                            fontsize = 12;
+                            drawColor = markerHighlightColor;
                         }
-                    }
 
-                    gl.DrawText((int)(markerPos.X + markerTriangleY * 2), (int)(markerPos.Y + markerTriangleY + markerOffsetY),
-                            drawColor.R, drawColor.G, drawColor.B, GLUtil.FONT, fontsize, strMarkerText);
-                } // end if (markerPos != null)
-            } // end for (int i = 0; i < Marker.MaxMarkerCount; i++)
+                        // Draw Marker Line
+                        gl.Begin(OpenGL.GL_LINE_STRIP);
+                        gl.Color(drawColor.R, drawColor.G, drawColor.B);
+
+                        gl.Vertex(markerPos.X, CurrentControlHeight - PaddingVertical);
+                        gl.Vertex(markerPos.X, PaddingVertical);
+                        gl.End();
+
+                        // Draw Marker Triangle
+                        gl.Begin(OpenGL.GL_TRIANGLES);
+                        gl.Color(drawColor.R, drawColor.G, drawColor.B);
+
+                        gl.Vertex(markerPos.X, markerPos.Y + markerOffsetY);
+                        gl.Vertex(markerPos.X + markerTriangleX, markerPos.Y + markerTriangleY + markerOffsetY);
+                        gl.Vertex(markerPos.X - markerTriangleX, markerPos.Y + markerTriangleY + markerOffsetY);
+                        gl.End();
+
+                        int fontsize = SpectrumChartUtil.GetFontSize(iter);
+
+                        // Draw Marker Text
+                        string strMarkerText = string.Format("M {0}", i + 1);
+
+                        // Fixed Mark
+                        if (marker.IsFixed(i))
+                        {
+                            strMarkerText = "Fix " + strMarkerText;
+                        }
+
+                        // Delta Mark
+                        if (marker.IsDelta(i))
+                        {
+                            // Additional Target Index Mark
+                            var targetIndex = marker.GetDeltaTargetIndex(i) + 1;
+                            if (targetIndex != null)
+                            {
+                                strMarkerText += string.Format(" | {0}", targetIndex);
+                                fontsize = 12;
+                            }
+                        }
+
+                        gl.DrawText((int)(markerPos.X + markerTriangleY * 2), (int)(markerPos.Y + markerTriangleY + markerOffsetY),
+                                drawColor.R, drawColor.G, drawColor.B, GLUtil.FONT, fontsize, strMarkerText);
+                    } // end if (markerPos != null)
+                } // end for (int i = 0; i < Marker.MaxMarkerCount; i++)
+            }
+        }
+
+        // Marker 정보를 도시함
+        private void DrawMarkerInfo(OpenGL gl, float fontSize)
+        {
+            var ScreenMinX = PaddingHorizontal + 15; // PaddingHorizontal - MarginX - xOffset;
+            var ScreenMinY = (float)CurrentControlHeight - PaddingVertical - 15; // PaddingVertical - MarginY;
+
+            if (ChartMode == ESpectrumChartMode.IQ)
+            {
+                var markerPosI = marker.GetPoints(0);
+                var markerPosQ = marker.GetPoints(1);
+
+                if (markerPosI == null || markerPosQ == null)
+                {
+                    return;
+                }
+
+                // 좌 상단에 Marker Info Overlay
+                var valueI = markerPosI.ValueY;
+                var valueQ = markerPosQ.ValueY;
+
+                string strMarkerInfoIText = string.Format("I : {0}, ", valueI);
+                string strMarkerInfoQText = string.Format("Q : {0}", valueQ);
+
+                if (TraceColors.Count > 1)
+                {
+                    GLUtil.DrawText(gl, strMarkerInfoIText, ScreenMinX, ScreenMinY, TraceColors[0]);
+                    GLUtil.DrawText(gl, strMarkerInfoQText, ScreenMinX + strMarkerInfoIText.Length * 6, ScreenMinY, TraceColors[1]);
+                }
+            } // end if (ChartMode == ESpectrumChartMode.IQ)
+
+            else
+            {
+                for (int i = 0; i < Marker.MaxMarkerCount; i++)
+                {
+                    var markerPos = marker.GetPoints(i);
+
+                    if (markerPos != null)
+                    {
+                        // 좌 상단에 Marker Info Overlay
+                        var valueX = markerPos.ValueX;
+                        var valueY = markerPos.ValueY;
+
+                        string strMarkerInfoText = string.Format("Mrk{0} : {1} dbm @ {2} MHz", i, valueY, valueX);
+
+                        GLUtil.DrawText(gl, strMarkerInfoText, ScreenMinX, ScreenMinY - (i * 20), AxisColor);
+                    }
+                } // end for (int i = 0; i < Marker.MaxMarkerCount; i++)
+            }
+        }
+
+        private void DrawComment(OpenGL gl)
+        {
+            if (TraceColors.Count < 2)
+            {
+                return;
+            }
+
+            var commentStartPosX = (float)CurrentControlWidth - PaddingHorizontal - 185;
+            var commentStartPosY = (float)CurrentControlHeight - PaddingVertical / 2 - 5;
+
+            int lineWidth = 10;
+            int interval = 100;
+            int yLineOffset = 2;
+            for (int i = 0; i < 2; i ++)
+            {
+                gl.Begin(OpenGL.GL_LINE_STRIP);
+                gl.Color(TraceColors[i].R, TraceColors[i].G, TraceColors[i].B);
+
+                gl.Vertex(commentStartPosX + i * interval, commentStartPosY + yLineOffset);
+                gl.Vertex(commentStartPosX + i * interval + lineWidth, commentStartPosY + yLineOffset);
+                gl.End();
+
+                string comment = i == 0 ? " : I Data" : " : Q Data";
+
+                var commentTextXPos = commentStartPosX + i * interval + lineWidth + 5;
+
+                GLUtil.DrawText(gl, comment, commentTextXPos, commentStartPosY, TraceColors[i]);
+            }
         }
 
         #region Mouse Event At Control
@@ -524,15 +668,28 @@ namespace GLGraphLib
             // 마커 선택하여 드래깅 시에 처리
             if (isDragOn)
             {
-                var mousePoint = e.GetPosition(null);
-                var screenX = (float)mousePoint.X; // 현재 따라오는 마우스 x 위치 
+                System.Windows.Point mousePoint = e.GetPosition(this);
+
+                PresentationSource presentationSource = PresentationSource.FromVisual(this);
+                System.Windows.Point transformedPosition = presentationSource.CompositionTarget.TransformFromDevice.Transform(mousePoint);
+                double mouseX = transformedPosition.X;
+                double mouseY = transformedPosition.Y;
+                
+                // PointToScreen(mousePoint);
+
+                float screenX = (float)mousePoint.X; // 현재 따라오는 마우스 x 위치 
                 if (screenX < 0 || screenX > CurrentControlWidth) return;
 
+                // Console.WriteLine(string.Format("{0}", mouseX));
+
                 // 현재 x 위치에서 가장 가까운 y위치 설정
-                var valueY = screenPositions.GetClosestData(screenX, ref screenX);
+                var screenY = screenPositions[targetTraceIndex].GetClosestData(screenX, ref screenX);
 
                 // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
-                marker.RenewSelectedMarker(screenX, valueY);
+                var (valueX, valueY) = ConvertCoordonateFromScreen(screenX, screenY);
+                marker.RenewSelectedMarker(screenX, screenY, valueX, valueY);
+
+                // Console.WriteLine(string.Format("{0} {1} {2} {3}", screenX, screenY, valueX, valueY));
             }
         }
 
@@ -549,10 +706,11 @@ namespace GLGraphLib
                 if (screenX < 0 || screenX > CurrentControlWidth) return;
 
                 // 현재 x 위치에서 가장 가까운 y위치 설정
-                var valueY = screenPositions.GetClosestData(screenX, ref screenX);
+                var screenY = screenPositions[targetTraceIndex].GetClosestData(screenX, ref screenX);
 
                 // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
-                marker.RenewSelectedMarker(screenX, valueY);
+                var (valueX, valueY) = ConvertCoordonateFromScreen(screenX, screenY);
+                marker.RenewSelectedMarker(screenX, screenY, valueX, valueY);
             }
         }
 
@@ -636,9 +794,23 @@ namespace GLGraphLib
                 // Center Frequency를 기본 Point로 추가
                 var DataLength = TotalDataLength;
 
-                var screenX = SpectrumChartUtil.GetScreenX(DataLength / 2 + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
-                var valueY = screenPositions.GetClosestData(screenX, ref screenX);
-                marker.AddPoint(screenX, valueY, markerIndex);
+                // var screenX = SpectrumChartUtil.GetScreenX((DataLength / 5) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
+                var screenX = SpectrumChartUtil.GetScreenX((DataLength / 2) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
+                var screenY = screenPositions[targetTraceIndex].GetClosestData(screenX, ref screenX);
+
+                var ScreenMinX = PaddingHorizontal;
+                var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal;
+                var ScreenMinY = PaddingVertical;
+                var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical;
+
+                marker.AddPoint(markerIndex, screenX, screenY, ScreenMinX, ScreenMaxX, ScreenMinY, ScreenMaxY, MinX, MaxX, MinY, MaxY);
+
+                // IQ 인 경우 다음 Trace에 대한 자동으로 Marker 하나 더 추가 (I에 대한 Q를 표현하기 위함)
+                if (ChartMode == ESpectrumChartMode.IQ)
+                {
+                    screenY = screenPositions[targetTraceIndex + 1].GetClosestData(screenX, ref screenX);
+                    marker.AddPoint(markerIndex, screenX, screenY, ScreenMinX, ScreenMaxX, ScreenMinY, ScreenMaxY, MinX, MaxX, MinY, MaxY);
+                }
             }
 
             return true;
@@ -659,42 +831,22 @@ namespace GLGraphLib
         }
         #endregion
 
-        #region Trace Interface
-        /// <summary>
-        /// Create Trace
-        /// </summary>
-        /// <param name="data">double array data(max length : Trace.TotalDataLength) </param>
-        /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
-        public void MakeTrace(int traceIndex)
+        public (double, double) ConvertCoordonateFromScreen(float x, float y)
         {
-            if (!IsLoadSample)
-            {
-                trace.SetData(SpectrumData, traceIndex, TotalDataLength);
-            }
+            var ScreenMinX = PaddingHorizontal;
+            var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal;
+            var ScreenMinY = PaddingVertical;
+            var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical;
+
+            // 입력 좌표를 r의 최소 및 최대 값 범위에서 0 ~ 1 사이의 비율로 변환합니다.
+            double ratioX = Math.Round((x - ScreenMinX) / (ScreenMaxX - ScreenMinX), 2);
+            double ratioY = Math.Round((y - ScreenMinY) / (ScreenMaxY - ScreenMinY), 2);
+
+            // 비율을 s의 범위에 맞춰 변환합니다.
+            double realX = Math.Round(MinX + ratioX * (MaxX - MinX), 2);
+            double realY = Math.Round(MinY + ratioY * (MaxY - MinY), 2);
+
+            return (realX, realY);
         }
-
-        /// <summary>
-        ///  Trace Show/Hide
-        /// </summary>
-        /// <param name="traceIndex">trace index 0~3(max count : 4)</param>
-        /// <returns></returns>
-        public bool ShowHideTrace(int traceIndex)
-        {
-            // 해당 Index에 대한 Trace data 유무 파악
-            if (trace.GetData(traceIndex) != null)
-            {
-                // Trace 초기화
-                trace.ClearData(traceIndex);
-            }
-
-            else
-            {
-                trace.SetData(new double[Trace.MaxTraceCount ,TotalDataLength], traceIndex, TotalDataLength);
-            }
-
-            return true;
-        }
-        #endregion
-
     }
 }

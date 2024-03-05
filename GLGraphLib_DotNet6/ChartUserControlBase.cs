@@ -226,7 +226,7 @@ namespace GLGraphLib
             // null
         );
 
-        private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        protected static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var baseControl = d as ChartUserControlBase;
 
@@ -237,6 +237,11 @@ namespace GLGraphLib
             {
                 switch (theme)
                 {
+                    case ETheme.Gray:
+                        baseControl.BackgroundColor = new RGBcolor(Color.Gray);
+                        baseControl.AxisColor = new RGBcolor(Color.White);
+                        break;
+
                     case ETheme.Black:
                         baseControl.BackgroundColor = new RGBcolor(Color.Black);
                         baseControl.AxisColor = new RGBcolor(Color.White);
