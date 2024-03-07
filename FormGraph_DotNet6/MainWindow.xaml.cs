@@ -2,6 +2,7 @@
 using GLGraphLib;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -29,6 +30,13 @@ namespace FormGraph_DotNet6
             MaxXTextBox.Text = (SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2).ToString();
             MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
             MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
+
+            SpectrumChartControl.TraceColors = new RGBcolor[4] {
+                new RGBcolor(Color.Blue),
+                new RGBcolor(Color.Red),
+                new RGBcolor(Color.Purple),
+                new RGBcolor(Color.Violet),
+            };
 
             vm = new SpectrumViewModel();
             this.SpectrumChartControl.DataContext = vm;
