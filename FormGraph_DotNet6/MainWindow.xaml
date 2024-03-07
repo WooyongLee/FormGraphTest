@@ -114,7 +114,7 @@
                     <TextBlock Text="Point Switch" Margin="5, 5"></TextBlock>
                     <Button x:Name="PrevButton" Content=" Prev " Margin="5, 3" Click="PrevButton_Click"></Button>
                     <Button x:Name="NextButton" Content=" Next " Margin="5, 3" Click="NextButton_Click"></Button>
-                    <TextBox x:Name="CurrentPointTextBox" Text="{Binding ElementName=SpectrumChartControl, Path=CurrentDataPosition, Mode=TwoWay}" 
+                    <TextBox x:Name="CurrentPointTextBox" Text="{Binding ElementName=SpectrumChartControl, Path=CurrentMarkerPosition, Mode=TwoWay}" 
                              HorizontalContentAlignment="Center" Width="40" Margin="5, 5"></TextBox>
                     <TextBlock Text=" / " Margin="5, 5"></TextBlock>
                     <TextBlock x:Name="MaxPointTextBlock" Text="0" Width="50" Margin="5, 5" ></TextBlock>

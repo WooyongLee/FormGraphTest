@@ -299,7 +299,7 @@ namespace FormGraph_DotNet6
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
-            var currentPoint = SpectrumChartControl.CurrentDataPosition; // int.Parse(CurrentPointTextBox.Text);
+            var currentPoint = SpectrumChartControl.CurrentMarkerPosition; // int.Parse(CurrentPointTextBox.Text);
             var maxPoint = int.Parse(MaxPointTextBlock.Text);
 
             if (currentPoint < 1)
@@ -308,7 +308,7 @@ namespace FormGraph_DotNet6
             }
 
             var decreasedCurrentPoint = currentPoint - 1;
-            SpectrumChartControl.CurrentDataPosition = decreasedCurrentPoint;
+            SpectrumChartControl.CurrentMarkerPosition = decreasedCurrentPoint;
             // CurrentPointTextBox.Text = (decreasedCurrentPoint).ToString();
 
             vm.MarkerInfo.MovePoint(decreasedCurrentPoint);
@@ -316,7 +316,7 @@ namespace FormGraph_DotNet6
 
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            var currentPoint = SpectrumChartControl.CurrentDataPosition; // int.Parse(CurrentPointTextBox.Text);
+            var currentPoint = SpectrumChartControl.CurrentMarkerPosition; // int.Parse(CurrentPointTextBox.Text);
             var maxPoint = int.Parse(MaxPointTextBlock.Text);
 
             if (maxPoint < currentPoint)
@@ -325,7 +325,7 @@ namespace FormGraph_DotNet6
             }
 
             var increasedCurrentPoint = currentPoint + 1;
-            SpectrumChartControl.CurrentDataPosition = increasedCurrentPoint;
+            SpectrumChartControl.CurrentMarkerPosition = increasedCurrentPoint;
             // CurrentPointTextBox.Text = (increasedCurrentPoint).ToString();
 
             vm.MarkerInfo.MovePoint(increasedCurrentPoint);

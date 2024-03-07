@@ -29,7 +29,7 @@ namespace FormGraph_DotNet6
 
         public SpectrumViewModel()
         {
-            MarkerInfo = new Marker(0);
+            MarkerInfo = new Marker(totalLength);
             TraceInfo = new Trace(totalLength);
         }
 

@@ -124,24 +124,24 @@ namespace GLGraphLib
                 var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical;
 
                 double valueX, valueY;
-                (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
                 // IQ 인 경우 다음 Trace에 대한 자동으로 Marker 하나 더 추가 (I에 대한 Q를 표현하기 위함)
                 // Marker Index는 0, 1 두개를 통합하여 운용
                 if (ChartMode == ESpectrumChartMode.IQ)
                 {
                     // Add I Marker
-                    MarkerInfo.AddPoint(0, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    MarkerInfo.AddPoint(0, screenX, screenY, valueX, valueY, CurrentMarkerPosition);
                     screenY = screenPositions[targetTraceIndex + 1].GetClosestData(screenX, ref screenX);
-                    (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                    (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
                     // Add Pair Q Marker
-                    MarkerInfo.AddPoint(1, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    MarkerInfo.AddPoint(1, screenX, screenY, valueX, valueY, CurrentMarkerPosition);
                 }
 
                 else
                 {
-                    MarkerInfo.AddPoint(markerIndex, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    MarkerInfo.AddPoint(markerIndex, screenX, screenY, valueX, valueY, CurrentMarkerPosition);
                 }
             }
         }
@@ -159,8 +159,8 @@ namespace GLGraphLib
 
                 double valueX, valueY;
                 (valueX, valueY, _) = ConvertCoordonateFromScreen(screenX, screenY);
-                CurrentDataPosition = newPosition; 
-                MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentDataPosition);
+                CurrentMarkerPosition = newPosition; 
+                MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentMarkerPosition);
             }
         }
 
@@ -793,9 +793,9 @@ namespace GLGraphLib
 
                         // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
                         double valueX, valueY;
-                        (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                        (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
-                        MarkerInfo.RenewMarkerIQ(screenX, screenY, valueX, valueY, CurrentDataPosition, i);
+                        MarkerInfo.RenewMarkerIQ(screenX, screenY, valueX, valueY, CurrentMarkerPosition, i);
                     }
                 }
 
@@ -806,9 +806,9 @@ namespace GLGraphLib
 
                     // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
                     double valueX, valueY;
-                    (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                    (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
-                    MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentMarkerPosition);
                 }
             }
         }
@@ -834,9 +834,9 @@ namespace GLGraphLib
 
                         // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
                         double valueX, valueY;
-                        (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                        (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
-                        MarkerInfo.RenewMarkerIQ(screenX, screenY, valueX, valueY, CurrentDataPosition, i);
+                        MarkerInfo.RenewMarkerIQ(screenX, screenY, valueX, valueY, CurrentMarkerPosition, i);
                     }
                 }
 
@@ -847,9 +847,9 @@ namespace GLGraphLib
 
                     // Marker Y 위치도 Renew 한 뒤, 선택한 Marker에 대한 위치 확정
                     double valueX, valueY;
-                    (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+                    (valueX, valueY, this.CurrentMarkerPosition) = ConvertCoordonateFromScreen(screenX, screenY);
 
-                    MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    MarkerInfo.RenewSelectedMarker(screenX, screenY, valueX, valueY, CurrentMarkerPosition);
                 }
 
 

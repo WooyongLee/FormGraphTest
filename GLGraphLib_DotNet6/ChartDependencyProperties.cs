@@ -123,7 +123,7 @@ namespace GLGraphLib
         }
 
         /// <summary>
-        /// Marker 정도
+        /// Marker 정보
         /// </summary>
         public Marker MarkerInfo
         {
@@ -143,10 +143,10 @@ namespace GLGraphLib
         /// <summary>
         /// 현재 선택된 Marker의 Trace 상에서 위치
         /// </summary>
-        public int CurrentDataPosition
+        public int CurrentMarkerPosition
         {
-            get { return (int)GetValue(CurrentDataPositionProperty); }
-            set { SetValue(CurrentDataPositionProperty, value); }
+            get { return (int)GetValue(CurrentMarkerPositionProperty); }
+            set { SetValue(CurrentMarkerPositionProperty, value); }
         }
 
         /// <summary>
@@ -250,8 +250,8 @@ namespace GLGraphLib
             null
             );
 
-        public static readonly DependencyProperty CurrentDataPositionProperty = DependencyProperty.Register(
-            "CurrentDataPosition",
+        public static readonly DependencyProperty CurrentMarkerPositionProperty = DependencyProperty.Register(
+            "CurrentMarkerPosition",
             typeof(int),
             typeof(SpectrumChart),
             null
