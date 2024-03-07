@@ -23,23 +23,6 @@ namespace GLGraphLib
             return data[index];
         }
 
-        // Set Data at Trace Index
-        public void SetData(double[, ] values, int index, int totalDataLength)
-        {
-            if (data[index] == null)
-            {
-                // List 초기화 및 기본값(0)으로 채우기
-                data[index] = new List<double>();
-                Enumerable.Range(0, totalDataLength).ToList().ForEach(i => data[index].Add(0));
-            }
-
-            var list = data[index];
-            for (int i = 0; i < totalDataLength; i++) 
-            {
-                list[i] = values[index, i];
-            }
-        }
-
         public void SetData(int index, List<double> values)
         {
             if (data[index] == null)

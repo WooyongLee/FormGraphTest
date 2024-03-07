@@ -2,16 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace GLGraphLib
 {
     public class Marker
     {
+        public event EventHandler MoveMarkerPositionEvent;
+
         public static readonly int MaxMarkerCount = 10;
-        public int SelectedMarkerIndex { get; set; } = 0;
 
         // Marker의 위치
-        private MarkerInfo[] Points { get; set; }
+        private MarkerPosition[] Points { get; set; }
 
         // Fixed Marker 대상 인덱스 리스트
         private List<int> FixedMarkerIndexList { get; set; }
@@ -19,76 +21,64 @@ namespace GLGraphLib
         // Delta Marker 대상 인덱스 페어 리스트
         private List<IndexPair> DeltaMarkerIndexList { get; set; }
 
-        public Marker()
+        // 현재 선택된 Marker 인덱스
+        internal int SelectedMarkerIndex { get; set; } = 0;
+
+        private int TotalDataLength;
+
+        public Marker(int totalDataLength)
         {
-            Points = new MarkerInfo[MaxMarkerCount];
+            Points = new MarkerPosition[MaxMarkerCount];
+
+            this.TotalDataLength = totalDataLength;
 
             FixedMarkerIndexList = new List<int>();
             DeltaMarkerIndexList = new List<IndexPair>();
         }
 
-        public int GetTargetTraceIndex(int markerIndex)
-        {
-            return Points[markerIndex].TargetTraceIndex;
-        }
-
-        // x, y가 screen 좌표
-        public void AddPoint(int markerIndex, float x, float y,
-            float screenMinX, float screenMaxX, float screenMinY, float screenMaxY,
-            double realMinX, double realMaxX, double realMinY, double realMaxY)
-        {
-            // 입력 좌표를 screen의 최소 및 최대 값 범위에서 0 ~ 1 사이의 비율로 변환합니다.
-            double ratioX = Math.Round((x - screenMinX) / (screenMaxX - screenMinX), 2);
-            double ratioY = Math.Round((y - screenMinY) / (screenMaxY - screenMinY), 2);
-
-            // 비율을 real의 범위에 맞춰 변환합니다.
-            double realX = Math.Round(realMinX + ratioX * (realMaxX - realMinX), 2);
-            double realY = Math.Round(realMinY + ratioY * (realMaxY - realMinY), 2);
-
-            Points[markerIndex] = new MarkerInfo(x, y, realX, realY);
-        }
-
-        public void AddPoint(float x, float y, int markerIndex)
-        {
-            // Marker의 총 개수 제한
-            if (SelectedMarkerIndex >= MaxMarkerCount) return;
-
-            this.SelectedMarkerIndex = markerIndex;
-
-            Points[markerIndex] = new MarkerInfo(x, y);
-        }
-
         // Index를 받아서 Point를 반환함
-        public MarkerInfo? GetPoints(int markerIndex)
+        public MarkerPosition? GetPoints(int markerIndex)
         {
             // if (markerIndex >= SelectedMarkerIndex) return null;
             if (Points[markerIndex] == null) return null;
             return Points[markerIndex];
         }
 
+        public void MovePoint(int point)
+        {
+            MoveMarkerPositionEvent.Invoke(point, new EventArgs());
+        }
+
+        internal void AddPoint(int markerIndex, float x, float y, double realX, double realY, int currentPos)
+        {
+            Points[markerIndex] = new MarkerPosition(x, y, realX, realY, currentPos, TotalDataLength);
+        }
+
         // Marker Point를 Spectrum 데이터 변화에 따라 갱신함
-        public void RenewPoint(float x, float y, int markerIndex)
+        internal void RenewPoint(float x, float y, int markerIndex)
         {
             if (Points[markerIndex] != null)
             {
                 if (Points[markerIndex].X == x)
                 {
-                    Points[markerIndex].SetXY(x, y);
+                    Points[markerIndex].SetPosition(x, y);
                 }
             }
         }
 
         // 선택된 Marker의 위치를 Refresh
-        public void RenewSelectedMarker(float x, float y, double valueX, double valueY)
+        internal void RenewSelectedMarker(float x, float y, double valueX, double valueY, int dataPosition)
         {
-            Points[SelectedMarkerIndex].SetXY(x, y);
+            Points[SelectedMarkerIndex].SetPosition(x, y, valueX, valueY, dataPosition);
+        }
 
-            Points[SelectedMarkerIndex].ValueX = valueX;
-            Points[SelectedMarkerIndex].ValueY = valueY;
+        internal void RenewMarkerIQ(float x, float y, double valueX, double valueY, int dataPosition, int index)
+        {
+            Points[index].SetPosition(x, y, valueX, valueY, dataPosition);
         }
 
         // Not Null Position
-        public int GetTotalPosCount()
+        internal int GetTotalPosCount()
         {
             int cnt = 0;
             foreach (var merkerPos in Points)
@@ -101,7 +91,7 @@ namespace GLGraphLib
             return cnt;
         }
 
-        public bool RemoveMarker(int markerIndex)
+        internal bool RemoveMarker(int markerIndex)
         {
             if (markerIndex >= MaxMarkerCount) return false;
 
@@ -111,7 +101,7 @@ namespace GLGraphLib
         }
 
         // Fixed Marker를 설정하거나 제거함
-        public bool SetFixedList(int markerIndex)
+        internal bool SetFixedList(int markerIndex)
         {
             bool hasIndex = FixedMarkerIndexList.Any(n => n == markerIndex);
 
@@ -129,13 +119,13 @@ namespace GLGraphLib
         }
 
         // 현재 Index가 Fixed임을 확인함
-        public bool IsFixed(int markerIndex)
+        internal bool IsFixed(int markerIndex)
         {
             return FixedMarkerIndexList.Any(n => n == markerIndex);
         }
 
         // Delta Marker를 설정하거나 제거함
-        public bool SetDeltaList(int sourceIndex, int targetIndex)
+        internal bool SetDeltaList(int sourceIndex, int targetIndex)
         {
             bool hasIndex = DeltaMarkerIndexList.Any(n => n.SourceIndex == sourceIndex);
             
@@ -152,7 +142,7 @@ namespace GLGraphLib
             return true;
         }
 
-        public bool IsDelta(int sourceIndex)
+        internal bool IsDelta(int sourceIndex)
         {
             // Find sourceIndex of target index
             // DeltaMarkerIndexList.Find(pair => pair.SourceIndex == sourceIndex)?.TargetIndex
@@ -160,46 +150,63 @@ namespace GLGraphLib
             return DeltaMarkerIndexList.Any(n => n.SourceIndex == sourceIndex);
         }
 
-        public int? GetDeltaTargetIndex(int sourceIndex)
+        internal int? GetDeltaTargetIndex(int sourceIndex)
         {
             return DeltaMarkerIndexList.Find(pair => pair.SourceIndex == sourceIndex)?.TargetIndex;
         }
 
-        public class MarkerInfo
+        public class MarkerPosition
         {
-            float x;
-            float y;
+            float x, y;
 
-            // Frequency
+            // Real X Value (Frequency)
             public double ValueX { get; set; }
 
-            // Amplitude
+            // Real Y Value (Amplitude)
             public double ValueY { get; set; }
 
+            // 현재 Marker가 위치한 Trace Index
             public int TargetTraceIndex { get; set; }
 
+            // Screen X
             public float X { get { return x; } private set { x = value; } }
+
+            // Screen Y
             public float Y { get { return y; } private set { y = value; } }
 
-            public MarkerInfo(float x, float y)
+            // 현재 위치
+            public int Current { get; set; }
+
+            // 전체 위치
+            public int Total { get; set; }
+
+            public MarkerPosition(float x, float y)
             {
                 this.x = x;
                 this.y = y;
             }
 
-            public MarkerInfo(float x, float y, double valX, double valY)
+            public MarkerPosition(float x, float y, double valX, double valY, int current, int total)
+            {
+                SetPosition(x, y, valX, valY, current);
+                Total = total;
+            }
+
+            public void SetPosition(float x, float y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+
+            public void SetPosition(float x, float y, double valX, double valY, int current)
             {
                 this.x = x;
                 this.y = y;
 
                 this.ValueX = valX;
                 this.ValueY = valY;
-            }
 
-            public void SetXY(float x, float y)
-            {
-                this.x = x;
-                this.y = y;
+                this.Current = current;
             }
         }
     }

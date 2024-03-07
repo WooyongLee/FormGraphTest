@@ -7,6 +7,10 @@ namespace GLGraphLib
 {
     public abstract partial class ChartUserControlBase : UserControl
     {
+        // 이벤트 정의
+        //public static event EventHandler MaxXChanged;
+        //public static event EventHandler MinXChanged;
+
         #region Properties
         /// <summary>
         /// Sample Load 여부
@@ -139,6 +143,7 @@ namespace GLGraphLib
             typeof(double),
             typeof(ChartUserControlBase),
             null
+            // new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnMinXChanged))
             );
 
         public static readonly DependencyProperty MinYProperty = DependencyProperty.Register(
@@ -153,6 +158,7 @@ namespace GLGraphLib
             typeof(double),
             typeof(ChartUserControlBase),
             null
+            // new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnMaxXChanged))
             );
 
         public static readonly DependencyProperty MaxYProperty = DependencyProperty.Register(
@@ -256,8 +262,17 @@ namespace GLGraphLib
                 }
             }
         }
-        #endregion
 
+        protected static void OnMaxXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // MaxXChanged?.Invoke(e.NewValue, new EventArgs());
+        }
+
+        protected static void OnMinXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // MinXChanged?.Invoke(e.NewValue, new EventArgs());
+        }
+        #endregion
 
         // 초기 Dependency Property 값 들을 할당
         public abstract void InitProperty();

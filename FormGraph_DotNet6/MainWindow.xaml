@@ -6,7 +6,7 @@
         xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900" Loaded="Window_Loaded">
+        Title="MainWindow" Height="700" Width="900" Loaded="Window_Loaded">
     <Grid>
         <StackPanel Orientation="Vertical">
             <Grid>
@@ -59,9 +59,9 @@
                 </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0, 3, 0, 3">
                         <TextBlock Margin="5, 0, 5, 0">MinX :</TextBlock>
-                        <TextBox x:Name="MinXTextBox" Width="50"></TextBox>
+                        <TextBox x:Name="MinXTextBox" Width="50" IsEnabled="False"></TextBox>
                         <TextBlock Margin="5, 0, 5, 0">MaxX :</TextBlock>
-                        <TextBox x:Name="MaxXTextBox" Width="50"></TextBox>
+                        <TextBox x:Name="MaxXTextBox" Width="50" IsEnabled="False"></TextBox>
                         <TextBlock Margin="5, 0, 5, 0">MinY :</TextBlock>
                         <TextBox x:Name="MinYTextBox" Width="50"></TextBox>
                         <TextBlock Margin="5, 0, 5, 0">MaxY : </TextBlock>
@@ -73,8 +73,13 @@
                         <TextBox x:Name="CenterFreqTextBox" Width="50"></TextBox>
                         <TextBlock Margin="5, 0, 5, 0">Span :</TextBlock>
                         <TextBox x:Name="SpanTextBox" Width="50"></TextBox>
-                        <Button x:Name="SetFreqButton" Margin="5, 0" Content=" Set Min X, Y " Click="SetFreqButton_Click"></Button>
+                        <Button x:Name="SetFreqButton" Margin="5, 0" Content=" Set Freq Span" Click="SetFreqButton_Click"></Button>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="5, 0">
+                        <TextBlock  Text="Theme Background Color" ></TextBlock>
+                        <RadioButton x:Name="BlackRadioButton"  Margin="10, 2, 5, 2" IsChecked="True" Content="Black " Checked="RadioButton_Checked"></RadioButton>
+                        <RadioButton x:Name="WhiteRadioButton" Margin="5, 2" Content="White" Checked="RadioButton_Checked"></RadioButton>
+                    </StackPanel> 
                 </StackPanel>
             </Grid>
             <Grid Panel.ZIndex="2">
@@ -90,9 +95,11 @@
 
                 <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="1001"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
-                                       CenterFrequency="3650.01" Span="150"
+                                       CenterFrequency="3650.01" Span="150" 
                                        IsShowXaxisText="True" ChartMode="DefaultSpecturm"
-                                       RefLevel="-20" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True">       
+                                       RefLevel="-20" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True"
+                                       TraceData="{Binding TraceInfo}"
+                                       >       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>
@@ -101,6 +108,26 @@
                 <WindowsFormsHost x:Name="FormConstellationChart" Visibility="Hidden">
                     <form:FormConstellationChart x:Name="ConstellationChart"></form:FormConstellationChart>
                 </WindowsFormsHost>-->
+            </Grid>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="RefereshButton" Content=" Refresh Position " Margin="5, 3" Click="RefreshButton_Click"></Button>
+                    <TextBlock Text="Point Switch" Margin="5, 5"></TextBlock>
+                    <Button x:Name="PrevButton" Content=" Prev " Margin="5, 3" Click="PrevButton_Click"></Button>
+                    <Button x:Name="NextButton" Content=" Next " Margin="5, 3" Click="NextButton_Click"></Button>
+                    <TextBox x:Name="CurrentPointTextBox" Text="{Binding ElementName=SpectrumChartControl, Path=CurrentDataPosition, Mode=TwoWay}" 
+                             HorizontalContentAlignment="Center" Width="40" Margin="5, 5"></TextBox>
+                    <TextBlock Text=" / " Margin="5, 5"></TextBlock>
+                    <TextBlock x:Name="MaxPointTextBlock" Text="0" Width="50" Margin="5, 5" ></TextBlock>
+                </StackPanel>
+            </Grid>
+            <Grid>
+                <local:MouseTrackerDecorator x:Name="mouseTracker">
+                    <Canvas Width="400" Height="100" Background="LightGray" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                        <Button Width="20" Height="20" Canvas.Left="{Binding ElementName=mouseTracker, Path=MousePosition.X}" 
+                                Canvas.Top="{Binding ElementName=mouseTracker, Path=MousePosition.Y}"  />
+                    </Canvas>
+                </local:MouseTrackerDecorator>
             </Grid>
             <!--<Button x:Name="ContextMenuButton" Click="ContextMenuButton_Click" Content="Context" Height="30" Width="100" HorizontalAlignment="Right">
                 <Button.ContextMenu>

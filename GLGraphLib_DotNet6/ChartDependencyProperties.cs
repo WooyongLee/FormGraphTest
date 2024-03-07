@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Transactions;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Markup.Primitives;
 using System.Windows.Media.Animation;
 
 // 해당 파일은 Dependency Object들을 정의
@@ -102,22 +104,49 @@ namespace GLGraphLib
     public partial class SpectrumChart
     {
         #region Properties
+        /// <summary>
+        /// Trace 데이터
+        /// </summary>
         public Trace TraceData
         {
             get { return (Trace)GetValue(TraceDataProperty); }
             set { SetValue(TraceDataProperty, value); }
         }
 
+        /// <summary>
+        /// Spectrum 보임/숨김
+        /// </summary>
         public bool[] IsVisibleSpectrum
         {
             get { return (bool[])GetValue(IsVisibleSpectrumProperty); }
             set { SetValue(IsVisibleSpectrumProperty, value); }
         }
 
+        /// <summary>
+        /// Marker 정도
+        /// </summary>
+        public Marker MarkerInfo
+        {
+            get { return (Marker)GetValue(MarkerInfoProperty); }
+            set { SetValue(MarkerInfoProperty, value); }
+        }
+
+        /// <summary>
+        /// 전체 스펙트럼 크기
+        /// </summary>
         public int TotalDataLength
         {
             get { return (int)GetValue(TotalDataLengthProperty); }
             set { SetValue(TotalDataLengthProperty, value); }
+        }
+
+        /// <summary>
+        /// 현재 선택된 Marker의 Trace 상에서 위치
+        /// </summary>
+        public int CurrentDataPosition
+        {
+            get { return (int)GetValue(CurrentDataPositionProperty); }
+            set { SetValue(CurrentDataPositionProperty, value); }
         }
 
         /// <summary>
@@ -204,9 +233,23 @@ namespace GLGraphLib
             typeof(SpectrumChart),
             null
             );
+        
+        public static readonly DependencyProperty MarkerInfoProperty = DependencyProperty.Register(
+            "MarkerInfo",
+            typeof(Marker),
+            typeof(SpectrumChart),
+            null
+            );
 
         public static readonly DependencyProperty TotalDataLengthProperty = DependencyProperty.Register(
             "TotalDataLength",
+            typeof(int),
+            typeof(SpectrumChart),
+            null
+            );
+
+        public static readonly DependencyProperty CurrentDataPositionProperty = DependencyProperty.Register(
+            "CurrentDataPosition",
             typeof(int),
             typeof(SpectrumChart),
             null
@@ -230,14 +273,14 @@ namespace GLGraphLib
             "RefLevel",
             typeof(double),
             typeof(SpectrumChart),
-            null
+            new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnRefLvChanged))
             );
 
         public static readonly DependencyProperty DivScaleProperty = DependencyProperty.Register(
             "DivScale",
             typeof(double),
             typeof(SpectrumChart),
-            null
+            new FrameworkPropertyMetadata(0.0, new PropertyChangedCallback(OnDivScaleChanged))
             );
 
         public static readonly DependencyProperty IsShowXaxisTextProperty = DependencyProperty.Register(
@@ -317,6 +360,90 @@ namespace GLGraphLib
             }
         }
 
+        private static void OnRefLvChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var spectrumChartControl = d as SpectrumChart;
+
+            // New Ref Level Value
+            double newValue = (double)e.NewValue;
+
+            if (spectrumChartControl != null)
+            {
+                spectrumChartControl.RefLevel = newValue;
+
+                spectrumChartControl.MaxY = spectrumChartControl.RefLevel;
+                spectrumChartControl.MinY = spectrumChartControl.RefLevel - 10 * spectrumChartControl.DivScale;
+            }
+        }
+
+        private static void OnDivScaleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var spectrumChartControl = d as SpectrumChart;
+
+            // New Ref Level Value
+            double newValue = (double)e.NewValue;
+
+            if (spectrumChartControl != null)
+            {
+                spectrumChartControl.DivScale = newValue;
+
+                spectrumChartControl.MaxY = spectrumChartControl.RefLevel;
+                spectrumChartControl.MinY = spectrumChartControl.RefLevel - 10 * spectrumChartControl.DivScale;
+            }
+        }
+
+        //protected static void OnMinXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        //{
+        //    var spectrumChartControl = d as SpectrumChart;
+
+        //    double newValue = (double)e.NewValue;
+
+        //    if (spectrumChartControl != null)
+        //    {
+        //        spectrumChartControl.MinX = newValue;
+
+        //        spectrumChartControl.CenterFrequency = (spectrumChartControl.MinX + spectrumChartControl.MaxX) / 2.0;
+        //        spectrumChartControl.Span = spectrumChartControl.MaxX - spectrumChartControl.MinX;
+        //    }
+        //}
+
+        //protected static void OnMaxXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        //{
+        //    var spectrumChartControl = d as SpectrumChart;
+
+        //    double newValue = (double)e.NewValue;
+
+        //    if (spectrumChartControl != null)
+        //    {
+        //        spectrumChartControl.MaxX = newValue;
+
+        //        spectrumChartControl.CenterFrequency = (spectrumChartControl.MinX + spectrumChartControl.MaxX) / 2.0;
+        //        spectrumChartControl.Span = spectrumChartControl.MaxX - spectrumChartControl.MinX;
+        //    }
+        //}
+
+        private void SpectrumChart_MinXChanged(object? sender, EventArgs e)
+        {
+            if (sender != null)
+            {
+                this.MinX = (double)sender;
+
+                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+                this.Span = this.MaxX - this.MinX;
+            }
+        }
+
+        private void SpectrumChart_MaxXChanged(object? sender, EventArgs e)
+        {
+            if (sender != null)
+            {
+                this.MaxX = (double)sender;
+
+                this.CenterFrequency = (this.MinX + this.MaxX) / 2.0;
+                this.Span = this.MaxX - this.MinX;
+            }
+        }
+
         override public void InitProperty()
         {
             if (this.NumOfRow <= 0 && this.NumOfColumn <= 0) this.NumOfRow = this.NumOfColumn = 10;
@@ -367,6 +494,9 @@ namespace GLGraphLib
             IsVisibleSpectrum = new bool[Trace.MaxTraceCount];
 
             IsVisibleSpectrum[0] = true; // 첫 trace는 Visible
+
+            //MinXChanged += SpectrumChart_MinXChanged;
+            //MaxXChanged += SpectrumChart_MaxXChanged;
         }
 
         public override void UpdateTheme()

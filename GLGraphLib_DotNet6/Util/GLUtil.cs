@@ -1,6 +1,7 @@
 ﻿using SharpGL;
 using SharpGL.Enumerations;
 using System;
+using System.Drawing;
 
 namespace GLGraphLib
 {
@@ -8,6 +9,7 @@ namespace GLGraphLib
     {
         // Text 폰트
         public static readonly string FONT = "Microsoft Sans Serif";
+        // public static readonly string FONT = "verdana";
 
         /// <summary>
         /// LineWidth를 적용한 BoundingBox를 그림
@@ -73,18 +75,27 @@ namespace GLGraphLib
             string formattedString = "{0," + (decPlace + 3).ToString() + "}";
             string strValue = string.Format(formattedString, truncatedValue);
 
-            // Draw Text
             gl.DrawText(x, y, c.R, c.G, c.B, FONT, size, strValue);
         }
 
-        public static void DrawText(OpenGL gl, string strText, float x, float y, RGBcolor c, float size = 12.0f)
+        public static void DrawText(OpenGL gl, string strText, float x, float y, RGBcolor c, float size = 12.0f, bool isBold = false)
         {
             var encodingBytes = System.Text.Encoding.ASCII.GetBytes(strText);
 
             var encodingStr = System.Text.Encoding.UTF8.GetString(encodingBytes);
 
-            // Draw Text -> Font는 vendana로 고정, MS. San Sarif 사용 시 의도하지 않은 문자열을 도시함
-            gl.DrawText((int)x, (int)y, c.R, c.G, c.B, "verdana", size, encodingStr);
+            // Draw Text
+            if (isBold)
+            {
+                gl.DrawText((int)x, (int)y, c.R, c.G, c.B, "verdana bold", size, encodingStr);
+            }
+
+            else
+            {
+                // Draw Text -> Font는 vendana로 고정, MS. San Sarif 사용 시 의도하지 않은 문자열을 도시함
+                gl.DrawText((int)x, (int)y, c.R, c.G, c.B, "verdana", size, encodingStr);
+            }
+
         }
     }
 }

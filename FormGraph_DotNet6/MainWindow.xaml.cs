@@ -14,6 +14,8 @@ namespace FormGraph_DotNet6
     {
         bool bToggled = true;
 
+        SpectrumViewModel vm;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -27,6 +29,9 @@ namespace FormGraph_DotNet6
             MaxXTextBox.Text = (SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2).ToString();
             MinYTextBox.Text = (SpectrumChartControl.RefLevel - SpectrumChartControl.NumOfColumn * SpectrumChartControl.DivScale).ToString();
             MaxYTextBox.Text = (SpectrumChartControl.RefLevel).ToString();
+
+            vm = new SpectrumViewModel();
+            this.SpectrumChartControl.DataContext = vm;
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -140,8 +145,11 @@ namespace FormGraph_DotNet6
                         data2.Add(scale * Math.Cos(radians)); // 코사인 값 추가
                     }
                 }
-                SpectrumChartControl.TraceData.SetData(0, data);
-                SpectrumChartControl.TraceData.SetData(1, data2);
+                //SpectrumChartControl.TraceData.SetData(0, data);
+                //SpectrumChartControl.TraceData.SetData(1, data2);
+                vm.AddTraceData();
+
+                MaxPointTextBlock.Text = data.Count.ToString();
             }
 
             // Spectrum
@@ -177,6 +185,8 @@ namespace FormGraph_DotNet6
                 SpectrumChartControl.TraceData.SetData(0, data);
                 SpectrumChartControl.TraceData.SetData(1, data2);
                 SpectrumChartControl.IsVisibleSpectrum[0] = true;
+
+                MaxPointTextBlock.Text = data.Count.ToString();
             }
         }
 
@@ -252,7 +262,76 @@ namespace FormGraph_DotNet6
         private void SetFreqButton_Click(object sender, RoutedEventArgs e)
         {
             SpectrumChartControl.CenterFrequency = double.Parse(CenterFreqTextBox.Text); 
-            SpectrumChartControl.Span = double.Parse(SpanTextBox.Text); 
+            SpectrumChartControl.Span = double.Parse(SpanTextBox.Text);
+
+            SpectrumChartControl.MaxX = SpectrumChartControl.CenterFrequency + SpectrumChartControl.Span / 2.0;
+            SpectrumChartControl.MinX = SpectrumChartControl.CenterFrequency - SpectrumChartControl.Span / 2.0;
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.SpectrumChartControl == null)
+            {
+                return;
+            }
+
+            if (sender is RadioButton)
+            {
+                var rButton = (RadioButton)sender;
+                if (rButton.Name.ToLower().Contains("black"))
+                {
+                    this.SpectrumChartControl.BackgroundTheme = GLGraphLib.ETheme.Black;
+                }
+                else if (rButton.Name.ToLower().Contains("white"))
+                {
+                    this.SpectrumChartControl.BackgroundTheme = GLGraphLib.ETheme.White;
+                }
+            }
+        }
+
+        private void PrevButton_Click(object sender, RoutedEventArgs e)
+        {
+            var currentPoint = SpectrumChartControl.CurrentDataPosition; // int.Parse(CurrentPointTextBox.Text);
+            var maxPoint = int.Parse(MaxPointTextBlock.Text);
+
+            if (currentPoint < 1)
+            {
+                return;
+            }
+
+            var decreasedCurrentPoint = currentPoint - 1;
+            SpectrumChartControl.CurrentDataPosition = decreasedCurrentPoint;
+            // CurrentPointTextBox.Text = (decreasedCurrentPoint).ToString();
+
+            SpectrumChartControl.MarkerInfo.MovePoint(decreasedCurrentPoint);
+        }
+
+        private void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            var currentPoint = SpectrumChartControl.CurrentDataPosition; // int.Parse(CurrentPointTextBox.Text);
+            var maxPoint = int.Parse(MaxPointTextBlock.Text);
+
+            if (maxPoint < currentPoint)
+            {
+                return;
+            }
+
+            var increasedCurrentPoint = currentPoint + 1;
+            SpectrumChartControl.CurrentDataPosition = increasedCurrentPoint;
+            // CurrentPointTextBox.Text = (increasedCurrentPoint).ToString();
+
+            SpectrumChartControl.MarkerInfo.MovePoint(increasedCurrentPoint);
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Test to Marker 1
+            var markerPt = SpectrumChartControl.MarkerInfo.GetPoints(0);
+
+            if (markerPt != null)
+            {
+                CurrentPointTextBox.Text = markerPt.Current.ToString();
+            }
         }
     }
 }
