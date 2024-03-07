@@ -185,13 +185,15 @@ namespace GLGraphLib
             set { SetValue(DivScaleProperty, value); }
         }
 
+        /// <summary>
+        /// 각 Trace 를 나타내는 Color
+        /// </summary>
         public IList<RGBcolor> TraceColors
         {
-            get { return (IList<RGBcolor>)GetValue(TraceColorsProperty); } 
+            get { return (IList<RGBcolor>)GetValue(TraceColorsProperty); }
             set { SetValue(TraceColorsProperty, value); }
         }
 
-        // To Do :: Color 관련하여 Dependency Object 추가하기
         RGBcolor spectrumColor1 = new RGBcolor(Color.Yellow); // trace 1
         RGBcolor spectrumColor2 = new RGBcolor(Color.Pink); // trace 2
         RGBcolor spectrumColor3 = new RGBcolor(Color.Purple); // trace 3
@@ -209,13 +211,13 @@ namespace GLGraphLib
         public bool IsShowMarkerInfo
         {
             get { return (bool)GetValue(IsShowMarkerInfoProperty); }
-            set { SetValue(IsShowMarkerInfoProperty, value);}
+            set { SetValue(IsShowMarkerInfoProperty, value); }
         }
 
         public ESpectrumChartMode ChartMode
         {
             get { return (ESpectrumChartMode)GetValue(ChartModeProperty); }
-            set { SetValue(ChartModeProperty, value);}
+            set { SetValue(ChartModeProperty, value); }
         }
         #endregion
 
@@ -233,7 +235,7 @@ namespace GLGraphLib
             typeof(SpectrumChart),
             null
             );
-        
+
         public static readonly DependencyProperty MarkerInfoProperty = DependencyProperty.Register(
             "MarkerInfo",
             typeof(Marker),
@@ -315,7 +317,7 @@ namespace GLGraphLib
             var spectrumChartControl = d as SpectrumChart;
             ESpectrumChartMode newChartMode = (ESpectrumChartMode)e.NewValue;
 
-            if (spectrumChartControl != null )
+            if (spectrumChartControl != null)
             {
                 if (newChartMode == ESpectrumChartMode.IQ)
                 {
@@ -335,7 +337,7 @@ namespace GLGraphLib
             // New Center Freq Value
             double newValue = (double)e.NewValue;
 
-            if (spectrumChartControl != null )
+            if (spectrumChartControl != null)
             {
                 spectrumChartControl.CenterFrequency = newValue;
 
@@ -501,16 +503,38 @@ namespace GLGraphLib
 
         public override void UpdateTheme()
         {
+            TraceColors = new RGBcolor[4] {
+                new RGBcolor(Color.Blue),
+                new RGBcolor(Color.Red),
+                new RGBcolor(Color.Purple),
+                new RGBcolor(Color.Violet), 
+            };
+            
             if (this.BackgroundTheme == ETheme.Black)
             {
                 BackgroundColor = new RGBcolor(Color.Black);
                 AxisColor = new RGBcolor(Color.White);
+
+                markerColor = new RGBcolor(Color.Orange);
+                markerHighlightColor = new RGBcolor(Color.Red);
             }
 
             else if (this.BackgroundTheme == ETheme.White)
             {
                 BackgroundColor = new RGBcolor(Color.White);
                 AxisColor = new RGBcolor(Color.Black);
+
+                markerColor = new RGBcolor(Color.Blue);
+                markerHighlightColor = new RGBcolor(Color.Red);
+            }
+
+            else if (this.BackgroundTheme == ETheme.Gray)
+            {
+                BackgroundColor = new RGBcolor(Color.White);
+                AxisColor = new RGBcolor(Color.Gray);
+
+                markerColor = new RGBcolor(Color.Blue);
+                markerHighlightColor = new RGBcolor(Color.Red);
             }
         }
     }

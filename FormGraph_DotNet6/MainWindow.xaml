@@ -98,8 +98,7 @@
                                        CenterFrequency="3650.01" Span="150" 
                                        IsShowXaxisText="True" ChartMode="DefaultSpecturm"
                                        RefLevel="-20" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True"
-                                       TraceData="{Binding TraceInfo}"
-                                       >       
+                                       TraceData="{Binding TraceInfo}" MarkerInfo="{Binding MarkerInfo}">       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
                     <form:FormGraphMain x:Name="GraphChart"></form:FormGraphMain>

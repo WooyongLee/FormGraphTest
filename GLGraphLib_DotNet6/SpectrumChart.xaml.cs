@@ -41,8 +41,8 @@ namespace GLGraphLib
         ScreenPositions[] screenPositions;
 
         // Color 설정
-        RGBcolor markerColor = new RGBcolor(Color.Red);
-        RGBcolor markerHighlightColor = new RGBcolor(Color.Orange);
+        RGBcolor markerColor = new RGBcolor(Color.Orange);
+        RGBcolor markerHighlightColor = new RGBcolor(Color.Red);
 
         #region public
         public bool IsSetMinMax = false;
@@ -101,7 +101,49 @@ namespace GLGraphLib
                 TraceData.SetData(i, new List<double>());
             }
 
-            MarkerInfo.MoveMarkerPositionEvent += SpectrumChart_MoveMarkerPositionEvent;
+            Marker.CreateMarkerEvent += MarkerInfo_CreateMarkerEvent;
+            Marker.MoveMarkerPositionEvent += SpectrumChart_MoveMarkerPositionEvent;
+        }
+
+        private void MarkerInfo_CreateMarkerEvent(object? sender, EventArgs e)
+        {
+            if (sender != null)
+            {
+                var markerIndex = (int)sender;
+
+                // Center Frequency를 기본 Point로 추가
+                var DataLength = TotalDataLength;
+
+                // var screenX = SpectrumChartUtil.GetScreenX((DataLength / 5) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
+                var screenX = SpectrumChartUtil.GetScreenX((DataLength / 2) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
+                var screenY = screenPositions[targetTraceIndex].GetClosestData(screenX, ref screenX);
+
+                var ScreenMinX = PaddingHorizontal;
+                var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal;
+                var ScreenMinY = PaddingVertical;
+                var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical;
+
+                double valueX, valueY;
+                (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+
+                // IQ 인 경우 다음 Trace에 대한 자동으로 Marker 하나 더 추가 (I에 대한 Q를 표현하기 위함)
+                // Marker Index는 0, 1 두개를 통합하여 운용
+                if (ChartMode == ESpectrumChartMode.IQ)
+                {
+                    // Add I Marker
+                    MarkerInfo.AddPoint(0, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                    screenY = screenPositions[targetTraceIndex + 1].GetClosestData(screenX, ref screenX);
+                    (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
+
+                    // Add Pair Q Marker
+                    MarkerInfo.AddPoint(1, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                }
+
+                else
+                {
+                    MarkerInfo.AddPoint(markerIndex, screenX, screenY, valueX, valueY, CurrentDataPosition);
+                }
+            }
         }
 
         private void SpectrumChart_MoveMarkerPositionEvent(object? sender, EventArgs e)
@@ -880,54 +922,6 @@ namespace GLGraphLib
         }
 
         #region Marker Interface 
-        public bool ShowHideMarker(int markerIndex)
-        {
-            // 해당 위치에 Marker 객체가 있는 경우
-            if (MarkerInfo.GetPoints(markerIndex) != null)
-            {
-                // 제거
-                MarkerInfo.RemoveMarker(markerIndex);
-            }
-
-            else
-            {
-                // Center Frequency를 기본 Point로 추가
-                var DataLength = TotalDataLength;
-
-                // var screenX = SpectrumChartUtil.GetScreenX((DataLength / 5) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
-                var screenX = SpectrumChartUtil.GetScreenX((DataLength / 2) + 1, DataLength, CurrentControlWidth, PaddingHorizontal);
-                var screenY = screenPositions[targetTraceIndex].GetClosestData(screenX, ref screenX);
-
-                var ScreenMinX = PaddingHorizontal;
-                var ScreenMaxX = (int)CurrentControlWidth - PaddingHorizontal;
-                var ScreenMinY = PaddingVertical;
-                var ScreenMaxY = (int)CurrentControlHeight - PaddingVertical;
-
-                double valueX, valueY;
-                (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
-
-                // IQ 인 경우 다음 Trace에 대한 자동으로 Marker 하나 더 추가 (I에 대한 Q를 표현하기 위함)
-                // Marker Index는 0, 1 두개를 통합하여 운용
-                if (ChartMode == ESpectrumChartMode.IQ)
-                {
-                    // Add I Marker
-                    MarkerInfo.AddPoint(0, screenX, screenY, valueX, valueY, CurrentDataPosition);
-                    screenY = screenPositions[targetTraceIndex + 1].GetClosestData(screenX, ref screenX);
-                    (valueX, valueY, this.CurrentDataPosition) = ConvertCoordonateFromScreen(screenX, screenY);
-
-                    // Add Pair Q Marker
-                    MarkerInfo.AddPoint(1, screenX, screenY, valueX, valueY, CurrentDataPosition);
-                }
-
-                else
-                {
-                    MarkerInfo.AddPoint(markerIndex, screenX, screenY, valueX, valueY, CurrentDataPosition);
-                }
-            }
-
-            return true;
-        }
-
         public bool SetMarkerFixed(int markerIndex)
         {
             MarkerInfo.SetFixedList(markerIndex);
@@ -971,7 +965,8 @@ namespace GLGraphLib
 
         public void Dispose()
         {
-            MarkerInfo.MoveMarkerPositionEvent -= SpectrumChart_MoveMarkerPositionEvent;
+            Marker.MoveMarkerPositionEvent -= SpectrumChart_MoveMarkerPositionEvent;
+            Marker.CreateMarkerEvent -= MarkerInfo_CreateMarkerEvent;
         }
     }
 }

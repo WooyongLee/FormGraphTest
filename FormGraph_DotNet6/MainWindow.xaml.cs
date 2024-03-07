@@ -70,8 +70,16 @@ namespace FormGraph_DotNet6
             if (btn != null)
             {
                 var markerNum = ExtractNumber(btn.Name);
+                int markerIndex = markerNum - 1;
 
-                SpectrumChartControl.ShowHideMarker(markerNum - 1);
+                if (vm.MarkerInfo.IsVisible[markerIndex])
+                {
+                    vm.MarkerInfo.Hide(markerIndex);
+                }
+                else
+                {
+                    vm.MarkerInfo.Show(markerIndex);
+                }
 
                 SpectrumChartControl.targetTraceIndex = 0;
             }
@@ -147,7 +155,7 @@ namespace FormGraph_DotNet6
                 }
                 //SpectrumChartControl.TraceData.SetData(0, data);
                 //SpectrumChartControl.TraceData.SetData(1, data2);
-                vm.AddTraceData();
+                vm.AddTraceIQ();
 
                 MaxPointTextBlock.Text = data.Count.ToString();
             }
@@ -155,7 +163,7 @@ namespace FormGraph_DotNet6
             // Spectrum
             else
             {
-                int totalLength = SpectrumChartControl.TotalDataLength - 50;
+                int totalLength = SpectrumChartControl.TotalDataLength;
                 var data = new List<double>();
                 var data2 = new List<double>();
                 if (isTwoState)
@@ -172,14 +180,6 @@ namespace FormGraph_DotNet6
                     {
                         data.Add(-0.1 * i);
                     }
-                }
-
-                for (int i = totalLength; i < SpectrumChartControl.TotalDataLength; i++)
-                {
-                    if (i % 2 == 0) data.Add(0 + 0.1 * i);
-                    else data.Add(-100 - 0.1 * i);
-
-                    data2.Add(-0.1 * i);
                 }
 
                 SpectrumChartControl.TraceData.SetData(0, data);
@@ -303,7 +303,7 @@ namespace FormGraph_DotNet6
             SpectrumChartControl.CurrentDataPosition = decreasedCurrentPoint;
             // CurrentPointTextBox.Text = (decreasedCurrentPoint).ToString();
 
-            SpectrumChartControl.MarkerInfo.MovePoint(decreasedCurrentPoint);
+            vm.MarkerInfo.MovePoint(decreasedCurrentPoint);
         }
 
         private void NextButton_Click(object sender, RoutedEventArgs e)
@@ -320,13 +320,13 @@ namespace FormGraph_DotNet6
             SpectrumChartControl.CurrentDataPosition = increasedCurrentPoint;
             // CurrentPointTextBox.Text = (increasedCurrentPoint).ToString();
 
-            SpectrumChartControl.MarkerInfo.MovePoint(increasedCurrentPoint);
+            vm.MarkerInfo.MovePoint(increasedCurrentPoint);
         }
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             // Test to Marker 1
-            var markerPt = SpectrumChartControl.MarkerInfo.GetPoints(0);
+            var markerPt = vm.MarkerInfo.GetPoints(0);
 
             if (markerPt != null)
             {

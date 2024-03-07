@@ -73,8 +73,6 @@ namespace GLGraphLib
             this.openGLControl.OpenGLDraw += OpenGLControl_OpenGLDraw;
             this.openGLControl.Resized += OpenGLControl_Resized;
 
-            InitProperty();
-
             spectrumColors = new RGBcolor[4] { spectrumColor1, spectrumColor2, spectrumColor3, spectrumColor4 };
 
             // Dependency Property Set Owner

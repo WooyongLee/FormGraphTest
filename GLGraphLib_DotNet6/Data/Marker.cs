@@ -2,15 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Printing.IndexedProperties;
 using System.Text.RegularExpressions;
 
 namespace GLGraphLib
 {
     public class Marker
     {
-        public event EventHandler MoveMarkerPositionEvent;
+        public static event EventHandler CreateMarkerEvent;
+        public static event EventHandler MoveMarkerPositionEvent;
 
         public static readonly int MaxMarkerCount = 10;
+
+        public bool[] IsVisible { get; private set; }
 
         // Marker의 위치
         private MarkerPosition[] Points { get; set; }
@@ -32,6 +36,8 @@ namespace GLGraphLib
 
             this.TotalDataLength = totalDataLength;
 
+            IsVisible = new bool[MaxMarkerCount];
+
             FixedMarkerIndexList = new List<int>();
             DeltaMarkerIndexList = new List<IndexPair>();
         }
@@ -47,6 +53,22 @@ namespace GLGraphLib
         public void MovePoint(int point)
         {
             MoveMarkerPositionEvent.Invoke(point, new EventArgs());
+        }
+
+        public void Show(int markerIndex)
+        {
+            if (IsVisible[markerIndex]) return; 
+            CreateMarkerEvent.Invoke(markerIndex, new EventArgs());
+            IsVisible[markerIndex] = true;
+        }
+
+        public void Hide(int markerIndex)
+        {
+            if (!IsVisible[markerIndex]) return;
+            if (GetPoints(markerIndex) != null)
+            {
+                RemoveMarker(markerIndex);
+            }
         }
 
         internal void AddPoint(int markerIndex, float x, float y, double realX, double realY, int currentPos)
@@ -96,6 +118,8 @@ namespace GLGraphLib
             if (markerIndex >= MaxMarkerCount) return false;
 
             Points[markerIndex] = null;
+
+            IsVisible[markerIndex] = false;
 
             return true;
         }
