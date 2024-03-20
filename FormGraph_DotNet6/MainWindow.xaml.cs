@@ -1,10 +1,14 @@
 ﻿using FormGraphLib_DotNet6;
 using GLGraphLib;
+using SharpGL.SceneGraph;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 
 namespace FormGraph_DotNet6
 {
@@ -171,23 +175,78 @@ namespace FormGraph_DotNet6
             // Spectrum
             else
             {
+                SpectrumChartControl.IsVisibleSpectrum[0] = true;
+
+
+                #region Dynamic sample
+                Timer timer = new Timer(SampleSpectrumGenerateContinuous);
+                timer.Change(100, 100);
+                #endregion
+
+                #region Static Sample (주석)
+                //int totalLength = SpectrumChartControl.TotalDataLength;
+
+                //var data = new List<double>();
+                //var data2 = new List<double>();
+                //if (isTwoState)
+                //{
+                //    for (int i = 0; i < totalLength; i++)
+                //    {
+                //        data.Add(-100 + 0.1 * i);
+                //        data2.Add(-0.1 * i);
+                //    }
+                //}
+                //else
+                //{
+                //    for (int i = 0; i < totalLength; i++)
+                //    {
+                //        data.Add(-0.1 * i);
+                //    }
+                //}
+
+                //SpectrumChartControl.TraceData.SetData(0, data);
+                //SpectrumChartControl.TraceData.SetData(1, data2);
+                //SpectrumChartControl.IsVisibleSpectrum[0] = true;
+
+                //MaxPointTextBlock.Text = data.Count.ToString();
+                #endregion
+            }
+        }
+
+        private void SampleSpectrumGenerateContinuous(object? state)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                // Measure the time taken by a certain function
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 int totalLength = SpectrumChartControl.TotalDataLength;
+
                 var data = new List<double>();
                 var data2 = new List<double>();
-                if (isTwoState)
+
+                Random random = new Random();
+                int MaxSample = totalLength;
+
+                // Draw Random (아무 신호가 없는 잡음을 표현)
+                for (int i = 0; i < MaxSample; i++)
                 {
-                    for (int i = 0; i < totalLength; i++)
+                    if (i < MaxSample / 6 || i > 5 * MaxSample / 6)
                     {
-                        data.Add(-100 + 0.1 * i);
-                        data2.Add(-0.1 * i);
+                        data.Add(random.Next(-87, -84));
+                    }
+
+                    else
+                    {
+                        data.Add(random.Next(-20, -9));
                     }
                 }
-                else
+
+                for (int i = 0; i < totalLength; i++)
                 {
-                    for (int i = 0; i < totalLength; i++)
-                    {
-                        data.Add(-0.1 * i);
-                    }
+                    // data.Add(-100 + 0.1 * i);
+                    data2.Add(-0.1 * i);
                 }
 
                 SpectrumChartControl.TraceData.SetData(0, data);
@@ -195,7 +254,12 @@ namespace FormGraph_DotNet6
                 SpectrumChartControl.IsVisibleSpectrum[0] = true;
 
                 MaxPointTextBlock.Text = data.Count.ToString();
-            }
+
+                stopwatch.Stop();
+
+                // Display the elapsed time
+                Console.WriteLine("Time taken by the function: " + stopwatch.Elapsed);
+            }));
         }
 
         private void SetMinXYButton_Click(object sender, RoutedEventArgs e)

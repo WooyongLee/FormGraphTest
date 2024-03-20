@@ -44,6 +44,11 @@ namespace GLGraphLib
         RGBcolor markerColor = new RGBcolor(Color.Orange);
         RGBcolor markerHighlightColor = new RGBcolor(Color.Red);
 
+        #region line length
+        float axisLineHalfLength = 0.01f;
+        float markerLineHalfLength = 0.5f;
+        #endregion
+
         #region public
         public bool IsSetMinMax = false;
 
@@ -51,28 +56,12 @@ namespace GLGraphLib
 
         #endregion
 
-        readonly DependencyProperty MousePositionProperty;
-
-        public System.Windows.Point MousePosition
-        {
-            get
-            {
-                return (System.Windows.Point)GetValue(MousePositionProperty);
-            }
-            set
-            {
-                SetValue(MousePositionProperty, value);
-            }
-        }
-
         public SpectrumChart()
         {
             InitializeComponent();
 
-            MousePositionProperty = DependencyProperty.Register("MousePosition", typeof(System.Windows.Point), typeof(SpectrumChart));
-
             // 기본 Total Length 설정
-            TotalDataLength = 1001;
+            //  TotalDataLength = 1001;
             screenPositions = new ScreenPositions[Trace.MaxTraceCount]; 
             for (int i = 0; i < Trace.MaxTraceCount; i++)
             {
@@ -92,7 +81,7 @@ namespace GLGraphLib
             TraceColors = new RGBcolor[4] { spectrumColor1, spectrumColor2, spectrumColor3, spectrumColor4 };
 
             // Dependency Property Set Owner
-            IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
+            // IsLoadSampleProperty.AddOwner(typeof(SpectrumChart));
 
             InitProperty();
 
@@ -269,24 +258,39 @@ namespace GLGraphLib
             double sizeX = (CurrentControlWidth - PaddingHorizontal * 2) / (double)NumOfColumn;
             double sizeY = (CurrentControlHeight - PaddingVertical * 2) / (double)NumOfRow;
 
-            // Draw the chart
-            for (int row = 0; row < NumOfRow; row++)
+            // Draw the axis, line width 조정을 위해 axisLineHalfLength 조정 필요
+            // x-axis
+            for (int row = 0; row <= NumOfRow; row++)
             {
-                for (int col = 0; col < NumOfColumn; col++)
-                {
-                    // Calculate the position of the current square
-                    var x = PaddingHorizontal + sizeX * col;
-                    var y = PaddingVertical + sizeY * row;
+                var xStart = PaddingHorizontal;
+                var xEnd = CurrentControlWidth - PaddingHorizontal * 2;
+                var y = PaddingVertical + sizeY * row;
 
-                    // Draw the current square
-                    gl.Begin(OpenGL.GL_LINE_LOOP);
-                    gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
-                    gl.Vertex(x, y, 0.0f);
-                    gl.Vertex(x + sizeX, y, 0.0f);
-                    gl.Vertex(x + sizeX, y + sizeY, 0.0f);
-                    gl.Vertex(x, y + sizeY, 0.0f);
-                    gl.End();
-                }
+                // Draw Horizontal Line
+                gl.Begin(OpenGL.GL_LINE_LOOP);
+                gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
+                gl.Vertex(xStart, y - axisLineHalfLength, 0.0f);
+                gl.Vertex(xStart + xEnd, y - axisLineHalfLength, 0.0f);
+                gl.Vertex(xStart + xEnd, y + axisLineHalfLength, 0.0f);
+                gl.Vertex(xStart, y + axisLineHalfLength, 0.0f);
+                gl.End();
+            }
+
+            // y-axis
+            for (int col = 0; col <= NumOfColumn; col++)
+            {
+                var x = PaddingHorizontal + sizeX * col;
+                var yStart = PaddingVertical;
+                var yEnd = CurrentControlHeight - PaddingVertical * 2;
+
+                // Draw Vertical Line
+                gl.Begin(OpenGL.GL_LINE_LOOP);
+                gl.Color(AxisColor.R, AxisColor.G, AxisColor.B);
+                gl.Vertex(x - axisLineHalfLength, yStart, 0.0f);
+                gl.Vertex(x - axisLineHalfLength, yStart + yEnd, 0.0f);
+                gl.Vertex(x + axisLineHalfLength, yStart + yEnd, 0.0f);
+                gl.Vertex(x + axisLineHalfLength, yStart, 0.0f);
+                gl.End();
             }
         }
 
@@ -497,6 +501,7 @@ namespace GLGraphLib
 
                     // Draw Line from points
                     gl.Begin(OpenGL.GL_LINE_STRIP);
+                    // gl.LineWidth(contentLineLength);
                     gl.Color(spectrumColor.R, spectrumColor.G, spectrumColor.B);
                     int dataLength = data.Count;
                     for (int i = 0; i < dataLength; i++)
@@ -547,17 +552,17 @@ namespace GLGraphLib
                 var drawColor = markerHighlightColor;
 
                 // Draw Marker Line
-                gl.Begin(OpenGL.GL_LINE_STRIP);
+                gl.Begin(OpenGL.GL_LINE_LOOP);
                 gl.Color(drawColor.R, drawColor.G, drawColor.B);
-
-                gl.Vertex(xPos, CurrentControlHeight - PaddingVertical);
-                gl.Vertex(xPos, PaddingVertical);
+                gl.Vertex(xPos - markerLineHalfLength, CurrentControlHeight - PaddingVertical);
+                gl.Vertex(xPos - markerLineHalfLength, PaddingVertical);
+                gl.Vertex(xPos + markerLineHalfLength, PaddingVertical);
+                gl.Vertex(xPos + markerLineHalfLength, CurrentControlHeight - PaddingVertical);
                 gl.End();
 
                 // Draw Marker Triangle Twice (Trace I and Q)
                 gl.Begin(OpenGL.GL_TRIANGLES);
                 gl.Color(drawColor.R, drawColor.G, drawColor.B);
-
                 gl.Vertex(xPos, yPosI + markerOffsetY);
                 gl.Vertex(xPos + markerTriangleX, yPosI + markerTriangleY + markerOffsetY);
                 gl.Vertex(xPos - markerTriangleX, yPosI + markerTriangleY + markerOffsetY);
@@ -565,7 +570,6 @@ namespace GLGraphLib
 
                 gl.Begin(OpenGL.GL_TRIANGLES);
                 gl.Color(drawColor.R, drawColor.G, drawColor.B);
-
                 gl.Vertex(xPos, yPosQ + markerOffsetY);
                 gl.Vertex(xPos + markerTriangleX, yPosQ + markerTriangleY + markerOffsetY);
                 gl.Vertex(xPos - markerTriangleX, yPosQ + markerTriangleY + markerOffsetY);
@@ -596,11 +600,13 @@ namespace GLGraphLib
                         }
 
                         // Draw Marker Line
-                        gl.Begin(OpenGL.GL_LINE_STRIP);
+                        gl.Begin(OpenGL.GL_LINE_LOOP);
                         gl.Color(drawColor.R, drawColor.G, drawColor.B);
 
-                        gl.Vertex(markerPos.X, CurrentControlHeight - PaddingVertical);
-                        gl.Vertex(markerPos.X, PaddingVertical);
+                        gl.Vertex(markerPos.X - markerLineHalfLength, CurrentControlHeight - PaddingVertical);
+                        gl.Vertex(markerPos.X - markerLineHalfLength, PaddingVertical);
+                        gl.Vertex(markerPos.X + markerLineHalfLength, PaddingVertical);
+                        gl.Vertex(markerPos.X + markerLineHalfLength, CurrentControlHeight - PaddingVertical);
                         gl.End();
 
                         // Draw Marker Triangle
@@ -701,7 +707,7 @@ namespace GLGraphLib
             var commentStartPosX = (float)CurrentControlWidth - PaddingHorizontal - 185;
             var commentStartPosY = (float)CurrentControlHeight - PaddingVertical / 2 - 5;
 
-            int lineWidth = 10;
+            int commentWidthOffset = 10;
             int interval = 100;
             int yLineOffset = 2;
             for (int i = 0; i < 2; i ++)
@@ -710,12 +716,12 @@ namespace GLGraphLib
                 gl.Color(TraceColors[i].R, TraceColors[i].G, TraceColors[i].B);
 
                 gl.Vertex(commentStartPosX + i * interval, commentStartPosY + yLineOffset);
-                gl.Vertex(commentStartPosX + i * interval + lineWidth, commentStartPosY + yLineOffset);
+                gl.Vertex(commentStartPosX + i * interval + commentWidthOffset, commentStartPosY + yLineOffset);
                 gl.End();
 
                 string comment = i == 0 ? " : I Data" : " : Q Data";
 
-                var commentTextXPos = commentStartPosX + i * interval + lineWidth + 5;
+                var commentTextXPos = commentStartPosX + i * interval + commentWidthOffset + 5;
 
                 GLUtil.DrawText(gl, comment, commentTextXPos, commentStartPosY, TraceColors[i]);
             }

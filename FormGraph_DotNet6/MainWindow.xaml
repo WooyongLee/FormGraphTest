@@ -93,11 +93,11 @@
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" > 
                 </glgraph:ConstellationChart>-->
 
-                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="1001"
+                <glgraph:SpectrumChart x:Name="SpectrumChartControl"  Visibility="Visible" TotalDataLength ="65000"
                                        Width="800" Height="300" HorizontalAlignment="Left" IsLoadSample="False"
                                        CenterFrequency="3650.01" Span="150" 
                                        IsShowXaxisText="True" ChartMode="DefaultSpecturm"
-                                       RefLevel="-20" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True"
+                                       RefLevel="0" DivScale="10" BackgroundTheme="Black" IsShowMarkerInfo ="True"
                                        TraceData="{Binding TraceInfo}" MarkerInfo="{Binding MarkerInfo}">       
                 </glgraph:SpectrumChart>
                 <!--<WindowsFormsHost x:Name="FormGraphChart" >
