@@ -14,6 +14,7 @@
                     <Button x:Name="SpectrumButton" Content="Spectrum" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
                     <Button x:Name="ConstellationButton" Content="Constellation"   Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
                     <Button x:Name="BarButton" Content="Bar" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
+                    <Button x:Name="SmithButton" Content="Smith Chart" Width="100" Panel.ZIndex="1" Margin="5, 1" Click="SpectrumButton_Click"></Button>
 
                     <ComboBox Width="100" Panel.ZIndex="3" IsHitTestVisible="True" Margin="5, 1" SelectedIndex="0">
                         <ComboBoxItem Content="Spectrum" Selected="ComboBoxItem_Selected"></ComboBoxItem>

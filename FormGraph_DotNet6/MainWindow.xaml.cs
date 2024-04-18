@@ -303,6 +303,11 @@ namespace FormGraph_DotNet6
                         BarChartWindow windows = new BarChartWindow();
                         windows.Show();
                     }
+
+                    else if (btnContent.Contains("Smith"))
+                    {
+
+                    }
                 }));
             }
         }
