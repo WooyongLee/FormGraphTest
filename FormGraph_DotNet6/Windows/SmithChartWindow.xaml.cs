@@ -11,5 +11,20 @@ namespace FormGraph_DotNet6
         {
             InitializeComponent();
         }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ChartAxis_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GenerateSampleButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

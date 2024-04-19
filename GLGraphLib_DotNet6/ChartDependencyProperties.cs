@@ -609,4 +609,17 @@ namespace GLGraphLib
         }
     }
 
+    public partial class SmithChart
+    {
+        override public void InitProperty()
+        {
+            BackgroundColor = new RGBcolor(Color.Black);
+            AxisColor = new RGBcolor(Color.White);
+        }
+
+        public override void UpdateTheme()
+        {
+
+        }
+    }
 }

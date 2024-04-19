@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
         mc:Ignorable="d"
-        Title="ConstellationChartWindow" Height="450" Width="800">
+        Title="ConstellationChartWindow" Height="650" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="3*"></RowDefinition>
@@ -15,7 +15,7 @@
 
         <Grid>
             <glgraph:SmithChart x:Name="SmithChartControl" Margin="3"  
-                                            Width="300" Height="300" HorizontalAlignment="Left" IsLoadSample="False" 
+                                            Width="450" Height="450" PaddingHorizontal="50" HorizontalAlignment="Left" IsLoadSample="False" 
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" >
             </glgraph:SmithChart>
         </Grid>
@@ -29,17 +29,14 @@
                     <RadioButton x:Name="WhiteRadioButton" Margin="5, 2" Content="White" Checked="RadioButton_Checked"></RadioButton>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox x:Name="VisibleLegendCheckBox" Margin="0, 3" Content="Visible Legend" Checked="VisibleLegendCheckBox_Checked" Unchecked="VisibleLegendCheckBox_Checked"></CheckBox>
-                    <TextBlock Margin="10, 3, 5, 3" Text=" |   Count Of Legend : "></TextBlock>
-                    <TextBox x:Name="LegendCountTextBox" Margin="0, 3" Text="3" Width="30" ></TextBox>
-                    <Button x:Name="LegendAutoGenButton" Margin="6, 1" Content=" Legend Auto Generate " Click="LegendAutoGenButton_Click" ></Button>
+                    <TextBlock  Text="Chart Axis" ></TextBlock>
+                    <RadioButton x:Name="SmithChartButton"  Margin="10, 2, 5, 2" Content="Smith" IsChecked="True" Checked="ChartAxis_Checked"></RadioButton>
+                    <RadioButton x:Name="PolarChartButton" Margin="5, 2" Content="Polar" Checked="ChartAxis_Checked"></RadioButton>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Max X = "></TextBlock>
-                    <TextBox x:Name="MaxXTextBox" Width="30" Text="2"></TextBox>
-                    <TextBlock Text=" | Max Y = "></TextBlock>
-                    <TextBox x:Name="MaxYTextBox" Width="30" Text="2"></TextBox>
-                    <Button x:Name="GenerateSampleButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
+                    <TextBlock Text="Count of Trace (1~4) = "></TextBlock>
+                    <TextBox x:Name="TraceNumBox" Width="30" Text="1"></TextBox>
+                    <Button x:Name="TraceNumButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
                 </StackPanel>
             </StackPanel>
         </Grid>

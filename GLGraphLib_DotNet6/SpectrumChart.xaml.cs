@@ -25,7 +25,6 @@ namespace GLGraphLib
 
         // OpenGL Control Rendering 반복을 체크하는 Iterator 변수
         int prevIter = 0;
-        int iter = 0;
 
         #region const
         // Marker Triangle x,y size Property

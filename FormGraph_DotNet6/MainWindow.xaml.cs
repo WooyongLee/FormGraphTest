@@ -306,7 +306,8 @@ namespace FormGraph_DotNet6
 
                     else if (btnContent.Contains("Smith"))
                     {
-
+                        SmithChartWindow windows = new SmithChartWindow();
+                        windows.Show();
                     }
                 }));
             }

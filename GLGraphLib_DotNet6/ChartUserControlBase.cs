@@ -7,6 +7,10 @@ namespace GLGraphLib
 {
     public abstract partial class ChartUserControlBase : UserControl
     {
+        #region fields
+        protected int iter = 0;
+        #endregion
+
         // 이벤트 정의
         //public static event EventHandler MaxXChanged;
         //public static event EventHandler MinXChanged;

@@ -8,8 +8,8 @@ namespace GLGraphLib
     public static class GLUtil
     {
         // Text 폰트
-        public static readonly string FONT = "Microsoft Sans Serif";
-        // public static readonly string FONT = "verdana";
+        // public static readonly string FONT = "Microsoft Sans Serif";
+        public static readonly string FONT = "verdana";
 
         /// <summary>
         /// LineWidth를 적용한 BoundingBox를 그림
