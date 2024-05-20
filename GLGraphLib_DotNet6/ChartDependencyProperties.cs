@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
 using System.Transactions;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -611,15 +612,92 @@ namespace GLGraphLib
 
     public partial class SmithChart
     {
+        public ComplexTrace Complexes
+        {
+            get { return (ComplexTrace)GetValue(ComplexesProperty); }
+            set { SetValue(ComplexesProperty, value); }
+        }
+
+        public bool IsPolarAxis
+        {
+            get { return (bool)GetValue(IsPolarAxisProperty); }
+            set { SetValue(IsPolarAxisProperty, value); }
+        }
+
+        /// <summary>
+        /// 각 Trace 를 나타내는 Color
+        /// </summary>
+        public IList<RGBcolor> TraceColors
+        {
+            get { return (IList<RGBcolor>)GetValue(TraceColorsProperty); }
+            set { SetValue(TraceColorsProperty, value); }
+        }
+
+        RGBcolor spectrumColor1 = new RGBcolor(Color.Yellow); // trace 1
+        RGBcolor spectrumColor2 = new RGBcolor(Color.Pink); // trace 2
+        RGBcolor spectrumColor3 = new RGBcolor(Color.Purple); // trace 3
+        RGBcolor spectrumColor4 = new RGBcolor(Color.Violet); // trace 4
+
+        public static readonly DependencyProperty ComplexesProperty = DependencyProperty.Register(
+            "Complexes",
+            typeof(ComplexTrace),
+            typeof(SmithChart),
+            null
+        );
+
+        public static readonly DependencyProperty IsPolarAxisProperty = DependencyProperty.Register(
+            "IsPolarAxis",
+            typeof(bool),
+            typeof(SmithChart),
+            null
+        );
+
+        public static readonly DependencyProperty TraceColorsProperty = DependencyProperty.Register(
+            "TraceColors",
+            typeof(IList<RGBcolor>),
+            typeof(SmithChart),
+            null
+        );
+
         override public void InitProperty()
         {
+            Complexes = new ComplexTrace();
+            TraceColors = new RGBcolor[4] {
+                new RGBcolor(Color.Blue),
+                new RGBcolor(Color.Red),
+                new RGBcolor(Color.Purple),
+                new RGBcolor(Color.Violet),
+            };
             BackgroundColor = new RGBcolor(Color.Black);
             AxisColor = new RGBcolor(Color.White);
         }
 
         public override void UpdateTheme()
         {
+            TraceColors = new RGBcolor[4] {
+                new RGBcolor(Color.Blue),
+                new RGBcolor(Color.Red),
+                new RGBcolor(Color.Purple),
+                new RGBcolor(Color.Violet),
+            };
 
+            if (this.BackgroundTheme == ETheme.Black)
+            {
+                BackgroundColor = new RGBcolor(Color.Black);
+                AxisColor = new RGBcolor(Color.White);
+            }
+
+            else if (this.BackgroundTheme == ETheme.White)
+            {
+                BackgroundColor = new RGBcolor(Color.White);
+                AxisColor = new RGBcolor(Color.Black);
+            }
+
+            else if (this.BackgroundTheme == ETheme.Gray)
+            {
+                BackgroundColor = new RGBcolor(Color.White);
+                AxisColor = new RGBcolor(Color.Gray);
+            }
         }
     }
 }

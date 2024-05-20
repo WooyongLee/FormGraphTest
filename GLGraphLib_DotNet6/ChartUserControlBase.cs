@@ -17,6 +17,15 @@ namespace GLGraphLib
 
         #region Properties
         /// <summary>
+        /// Chart Title 도시 여부
+        /// </summary>
+        public bool IsDrawChartTitle
+        {
+            get { return (bool)GetValue(IsDrawChartTitleProperty); }
+            set { SetValue(IsDrawChartTitleProperty, value); }
+        }
+
+        /// <summary>
         /// Sample Load 여부
         /// </summary>
         public bool IsLoadSample
@@ -135,6 +144,13 @@ namespace GLGraphLib
         #endregion
 
         #region Define DependencyProperty from Properties
+        public static readonly DependencyProperty IsDrawChartTitleProperty = DependencyProperty.Register(
+            "IsDrawChartTitle",
+            typeof(bool),
+            typeof(ChartUserControlBase),
+            null
+            );
+
         public static readonly DependencyProperty IsLoadSampleProperty = DependencyProperty.Register(
             "IsLoadSample",
             typeof(bool),

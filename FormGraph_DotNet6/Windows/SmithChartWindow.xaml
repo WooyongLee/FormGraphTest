@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FormGraph_DotNet6"
         xmlns:glgraph="clr-namespace:GLGraphLib;assembly=GLGraphLib_DotNet6"
         mc:Ignorable="d"
-        Title="ConstellationChartWindow" Height="650" Width="800">
+        Title="SmithPolarChartWindow" Height="650" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="3*"></RowDefinition>
@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <Grid>
-            <glgraph:SmithChart x:Name="SmithChartControl" Margin="3"  
+            <glgraph:SmithChart x:Name="SmithChartControl" Margin="3"  IsPolarAxis="False"
                                             Width="450" Height="450" PaddingHorizontal="50" HorizontalAlignment="Left" IsLoadSample="False" 
                                             MinX="-2" MaxX="2" MinY="-2" MaxY="2" >
             </glgraph:SmithChart>
@@ -34,9 +34,7 @@
                     <RadioButton x:Name="PolarChartButton" Margin="5, 2" Content="Polar" Checked="ChartAxis_Checked"></RadioButton>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Count of Trace (1~4) = "></TextBlock>
-                    <TextBox x:Name="TraceNumBox" Width="30" Text="1"></TextBox>
-                    <Button x:Name="TraceNumButton" Margin="6, 0" Content=" Sample Refreshed " Click="GenerateSampleButton_Click"></Button>
+                    <Button x:Name="LoadSampleButton" Margin="6, 0" Content=" Load Sample " Click="GenerateSampleButton_Click"></Button>
                 </StackPanel>
             </StackPanel>
         </Grid>
