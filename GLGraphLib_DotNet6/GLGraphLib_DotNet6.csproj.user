@@ -2,6 +2,9 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <Compile Update="MouseAbleChart.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="SmithChart.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -14,6 +17,9 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="ConstellationChart.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MouseAbleChart.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="SmithChart.xaml">

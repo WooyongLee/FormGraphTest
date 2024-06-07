@@ -1,0 +1,13 @@
+﻿<Window x:Class="FormGraph_DotNet6.MouseAbleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FormGraph_DotNet6"
+        xmlns:glgraph="clr-namespace:GLGraphLib_DotNet6;assembly=GLGraphLib_DotNet6"
+        mc:Ignorable="d"
+        Title="MouseAbleWindow" Height="450" Width="800">
+    <Grid>
+        <glgraph:MouseAbleChart x:Name="MouseAbleChartControl"></glgraph:MouseAbleChart>
+    </Grid>
+</Window>

@@ -27,3 +27,5 @@
 /Common_GLGraph/obj/Common_GLGraph.csproj.nuget.g.targets
 /Common_GLGraph/obj/project.assets.json
 /Common_GLGraph/obj/project.nuget.cache
+/GLGraphLib/obj/Release
+/GLGraphLib_DotNet6/bin/Release/net6.0-windows

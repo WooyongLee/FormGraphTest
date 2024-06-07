@@ -411,5 +411,11 @@ namespace FormGraph_DotNet6
                 CurrentPointTextBox.Text = markerPt.Current.ToString();
             }
         }
+
+        private void MouseWheelViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            MouseAbleWindow win = new MouseAbleWindow();
+            win.Show();
+        }
     }
 }
